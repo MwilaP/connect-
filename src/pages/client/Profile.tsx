@@ -4,18 +4,9 @@ import { createClient } from "../../../lib/supabase/client"
 import { Button } from "../../../components/ui/button"
 import { useSupabase } from "../../SupabaseContext"
 import type { User } from "@supabase/supabase-js"
-
-interface ClientProfile {
-  id: string
-  user_id: string
-  name: string
-  age: number | null
-  location: string
-  bio?: string
-  preferences?: string
-  photo_url: string | null
-  created_at: string
-}
+import { calculateAge } from "../../../lib/age-utils"
+import { formatLocation } from "../../../lib/location-data"
+import type { ClientProfile } from "../../../lib/types"
 
 export default function ClientProfilePage() {
   const navigate = useNavigate()
@@ -65,7 +56,7 @@ export default function ClientProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b">
+      <header className="border-b bg-background sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="text-xl font-semibold">
             ConnectPro
@@ -105,16 +96,20 @@ export default function ClientProfilePage() {
             <p className="mt-1 text-lg">{profile?.name}</p>
           </div>
 
-          {profile?.age && (
+          {profile?.date_of_birth && (
             <div>
               <h2 className="text-sm font-medium text-muted-foreground">Age</h2>
-              <p className="mt-1 text-lg">{profile.age}</p>
+              <p className="mt-1 text-lg">{calculateAge(profile.date_of_birth)} years</p>
             </div>
           )}
 
           <div>
             <h2 className="text-sm font-medium text-muted-foreground">Location</h2>
-            <p className="mt-1 text-lg">{profile?.location}</p>
+            <p className="mt-1 text-lg">
+              {profile?.country && profile?.city
+                ? formatLocation(profile.country, profile.city, profile.area || undefined)
+                : profile?.location || "Not specified"}
+            </p>
           </div>
 
           {profile?.bio && (

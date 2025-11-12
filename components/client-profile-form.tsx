@@ -8,6 +8,9 @@ import { Textarea } from "./ui/textarea"
 import { createClient } from "../lib/supabase/client"
 import type { ClientProfile } from "../lib/types"
 import { Upload, X } from "lucide-react"
+import { isAtLeast18 } from "../lib/age-utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { locationData, getCitiesByCountry, getAreasByCity, formatLocation } from "../lib/location-data"
 
 interface ClientProfileFormProps {
   profile?: ClientProfile
@@ -22,8 +25,10 @@ export function ClientProfileForm({ profile }: ClientProfileFormProps) {
 
   const [formData, setFormData] = useState({
     name: profile?.name || "",
-    age: profile?.age?.toString() || "",
-    location: profile?.location || "",
+    date_of_birth: profile?.date_of_birth || "",
+    country: profile?.country || "",
+    city: profile?.city || "",
+    area: profile?.area || "",
     bio: profile?.bio || "",
     preferences: profile?.preferences || "",
     photo_url: profile?.photo_url || "",
@@ -111,24 +116,23 @@ export function ClientProfileForm({ profile }: ClientProfileFormProps) {
       if (!formData.name.trim()) {
         throw new Error("Name is required")
       }
-      if (!formData.location.trim()) {
-        throw new Error("Location is required")
+      if (!formData.country || !formData.city) {
+        throw new Error("Country and city are required")
       }
 
-      // Validate age if provided
-      let ageValue: number | null = null
-      if (formData.age.trim()) {
-        ageValue = parseInt(formData.age)
-        if (isNaN(ageValue) || ageValue < 18) {
-          throw new Error("Age must be 18 or older")
-        }
+      // Validate date of birth if provided
+      if (formData.date_of_birth && !isAtLeast18(formData.date_of_birth)) {
+        throw new Error("You must be at least 18 years old")
       }
 
       const profileData = {
         user_id: user.id,
         name: formData.name.trim(),
-        age: ageValue,
-        location: formData.location.trim(),
+        date_of_birth: formData.date_of_birth || null,
+        location: formatLocation(formData.country, formData.city, formData.area), // Legacy field
+        country: formData.country || null,
+        city: formData.city || null,
+        area: formData.area || null,
         bio: formData.bio.trim() || null,
         preferences: formData.preferences.trim() || null,
         photo_url: formData.photo_url || null,
@@ -219,29 +223,88 @@ export function ClientProfileForm({ profile }: ClientProfileFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="age">Age</Label>
+        <Label htmlFor="date_of_birth">Date of Birth</Label>
         <Input
-          id="age"
-          type="number"
-          min="18"
-          value={formData.age}
-          onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-          placeholder="Your age (18+)"
+          id="date_of_birth"
+          type="date"
+          value={formData.date_of_birth}
+          onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+          max={new Date().toISOString().split('T')[0]}
         />
+        <p className="text-xs text-muted-foreground">
+          You must be at least 18 years old
+        </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="location">
-          Location <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id="location"
-          type="text"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          placeholder="City, State"
-          required
-        />
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="country">
+            Country <span className="text-destructive">*</span>
+          </Label>
+          <Select
+            value={formData.country}
+            onValueChange={(value) => {
+              setFormData({ ...formData, country: value, city: "", area: "" })
+            }}
+          >
+            <SelectTrigger id="country">
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent>
+              {locationData.countries.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
+                  {country.flag} {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {formData.country && (
+          <div className="space-y-2">
+            <Label htmlFor="city">
+              City <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={formData.city}
+              onValueChange={(value) => {
+                setFormData({ ...formData, city: value, area: "" })
+              }}
+            >
+              <SelectTrigger id="city">
+                <SelectValue placeholder="Select city" />
+              </SelectTrigger>
+              <SelectContent>
+                {getCitiesByCountry(formData.country).map((city) => (
+                  <SelectItem key={city.name} value={city.name}>
+                    {city.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {formData.country && formData.city && (
+          <div className="space-y-2">
+            <Label htmlFor="area">Area/Neighborhood</Label>
+            <Input
+              id="area"
+              value={formData.area}
+              onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+              placeholder="Enter your area or neighborhood"
+              list="area-suggestions"
+            />
+            <datalist id="area-suggestions">
+              {getAreasByCity(formData.country, formData.city).map((area) => (
+                <option key={area} value={area} />
+              ))}
+            </datalist>
+            <p className="text-xs text-muted-foreground">
+              Start typing to see suggestions, or enter your own area
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Badge } from "../../../components/ui/badge"
 import { useSupabase } from "../../SupabaseContext"
 import { getProviderAge } from "../../../lib/age-utils"
+import { formatLocation } from "../../../lib/location-data"
 import type { User } from "@supabase/supabase-js"
 import type { ProviderProfile } from "../../../lib/types"
 
@@ -59,7 +60,7 @@ export default function ProviderProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="border-b bg-background sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="text-xl font-semibold">
             ConnectPro
@@ -100,7 +101,11 @@ export default function ProviderProfilePage() {
               )}
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Location</p>
-                <p className="text-lg">{profile?.location}</p>
+                <p className="text-lg">
+                  {profile?.country && profile?.city
+                    ? formatLocation(profile.country, profile.city, profile.area || undefined)
+                    : profile?.location || "Not specified"}
+                </p>
               </div>
               {profile?.contact_number && (
                 <div>

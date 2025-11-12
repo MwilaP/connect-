@@ -1,6 +1,6 @@
--- Add age and photo_url columns to client_profiles table
+-- Add date_of_birth and photo_url columns to client_profiles table
 ALTER TABLE client_profiles
-ADD COLUMN IF NOT EXISTS age INTEGER CHECK (age >= 18),
+ADD COLUMN IF NOT EXISTS date_of_birth DATE,
 ADD COLUMN IF NOT EXISTS photo_url TEXT;
 
 -- Create storage bucket for client photos

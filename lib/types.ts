@@ -14,7 +14,10 @@ export interface ProviderProfile {
   name: string
   age?: number | null
   date_of_birth?: string | null
-  location: string
+  location: string // Legacy field, kept for backward compatibility
+  country?: string | null
+  city?: string | null
+  area?: string | null
   hourly_rate?: number | null
   bio: string | null
   images: string[]
@@ -33,8 +36,11 @@ export interface ClientProfile {
   id: string
   user_id: string
   name: string
-  age: number | null
-  location: string
+  date_of_birth: string | null
+  location: string // Legacy field, kept for backward compatibility
+  country?: string | null
+  city?: string | null
+  area?: string | null
   bio: string | null
   preferences: string | null
   photo_url: string | null

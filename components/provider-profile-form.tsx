@@ -11,6 +11,7 @@ import { X, Upload, Plus, Trash2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import type { ProviderProfile, ProviderService } from "../lib/types"
 import { calculateAge, isAtLeast18 } from "../lib/age-utils"
+import { locationData, getCitiesByCountry, getAreasByCity, formatLocation } from "../lib/location-data"
 
 interface ProviderProfileFormProps {
   userId: string
@@ -38,7 +39,9 @@ export function ProviderProfileForm({ userId, existingProfile }: ProviderProfile
   const [formData, setFormData] = useState({
     name: existingProfile?.name || "",
     date_of_birth: existingProfile?.date_of_birth || "",
-    location: existingProfile?.location || "",
+    country: existingProfile?.country || "",
+    city: existingProfile?.city || "",
+    area: existingProfile?.area || "",
     bio: existingProfile?.bio || "",
     country_code: contactParts.code,
     phone_number: contactParts.number,
@@ -138,7 +141,10 @@ export function ProviderProfileForm({ userId, existingProfile }: ProviderProfile
         name: formData.name,
         date_of_birth: formData.date_of_birth,
         age: calculateAge(formData.date_of_birth) || 0,
-        location: formData.location,
+        location: formatLocation(formData.country, formData.city, formData.area), // Legacy field
+        country: formData.country || null,
+        city: formData.city || null,
+        area: formData.area || null,
         bio: formData.bio || null,
         contact_number: formData.phone_number ? `${formData.country_code} ${formData.phone_number}` : null,
         images: finalImageUrls,
@@ -263,15 +269,71 @@ export function ProviderProfileForm({ userId, existingProfile }: ProviderProfile
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Location *</Label>
-            <Input
-              id="location"
-              required
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="New York, NY"
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="country">Country *</Label>
+              <Select
+                value={formData.country}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, country: value, city: "", area: "" })
+                }}
+              >
+                <SelectTrigger id="country">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locationData.countries.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.country && (
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Select
+                  value={formData.city}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, city: value, area: "" })
+                  }}
+                >
+                  <SelectTrigger id="city">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getCitiesByCountry(formData.country).map((city) => (
+                      <SelectItem key={city.name} value={city.name}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {formData.country && formData.city && (
+              <div className="space-y-2">
+                <Label htmlFor="area">Area/Neighborhood</Label>
+                <Input
+                  id="area"
+                  value={formData.area}
+                  onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                  placeholder="Enter your area or neighborhood"
+                  list="area-suggestions"
+                />
+                <datalist id="area-suggestions">
+                  {getAreasByCity(formData.country, formData.city).map((area) => (
+                    <option key={area} value={area} />
+                  ))}
+                </datalist>
+                <p className="text-xs text-muted-foreground">
+                  Start typing to see suggestions, or enter your own area
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

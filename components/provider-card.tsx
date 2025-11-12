@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { MapPin, Lock } from "lucide-react"
 import type { ProviderProfile } from "../lib/types"
+import { formatLocation } from "../lib/location-data"
 
 interface ProviderCardProps {
   provider: ProviderProfile
@@ -40,7 +41,11 @@ export function ProviderCard({ provider, blurred = false }: ProviderCardProps) {
         <h3 className="text-xl font-semibold">{provider.name}</h3>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
-          <span>{provider.location}</span>
+          <span>
+            {provider.country && provider.city
+              ? formatLocation(provider.country, provider.city, provider.area || undefined)
+              : provider.location || "Location not specified"}
+          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">

@@ -14,6 +14,7 @@ import {
 } from "../../../components/ui/dialog"
 import { useSupabase } from "../../SupabaseContext"
 import { getProviderAge } from "../../../lib/age-utils"
+import { formatLocation } from "../../../lib/location-data"
 import type { User } from "@supabase/supabase-js"
 import type { ProviderProfile } from "../../../lib/types"
 
@@ -318,7 +319,11 @@ export default function ProviderDashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Location</p>
-                <p className="text-lg">{profile?.location}</p>
+                <p className="text-lg">
+                  {profile?.country && profile?.city
+                    ? formatLocation(profile.country, profile.city, profile.area || undefined)
+                    : profile?.location || "Not specified"}
+                </p>
               </div>
               {profile && getProviderAge(profile) && (
                 <div>

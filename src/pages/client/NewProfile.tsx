@@ -46,7 +46,7 @@ export default function NewClientProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b">
+      <header className="border-b bg-background sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <h1 className="text-xl font-semibold">ConnectPro</h1>
         </div>
