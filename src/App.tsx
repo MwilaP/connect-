@@ -18,6 +18,7 @@ import ProviderDetail from './pages/browse/ProviderDetail'
 import ClientProfile from './pages/client/Profile'
 import NewClientProfile from './pages/client/NewProfile'
 import EditClientProfile from './pages/client/EditProfile'
+import ClientSubscription from './pages/client/Subscription'
 
 // Provider Pages
 import ProviderProfile from './pages/provider/Profile'
@@ -51,6 +52,7 @@ function App() {
       <Route path="/client/profile" element={<ClientProfile />} />
       <Route path="/client/profile/new" element={<NewClientProfile />} />
       <Route path="/client/profile/edit" element={<EditClientProfile />} />
+      <Route path="/client/subscription" element={<ClientSubscription />} />
       
       {/* Provider Routes */}
       <Route path="/provider/dashboard" element={<ProviderDashboard />} />

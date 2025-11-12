@@ -1,12 +1,25 @@
+export interface ProviderService {
+  id: string
+  provider_id: string
+  service_name: string
+  price: number
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface ProviderProfile {
   id: string
   user_id: string
   name: string
-  age: number
+  age?: number | null
+  date_of_birth?: string | null
   location: string
-  hourly_rate: number
+  hourly_rate?: number | null
   bio: string | null
   images: string[]
+  contact_number?: string | null
+  services?: ProviderService[]
   created_at: string
   updated_at: string
 }
@@ -20,9 +33,11 @@ export interface ClientProfile {
   id: string
   user_id: string
   name: string
+  age: number | null
   location: string
   bio: string | null
   preferences: string | null
+  photo_url: string | null
   created_at: string
   updated_at: string
 }

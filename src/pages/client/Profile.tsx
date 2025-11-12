@@ -9,9 +9,11 @@ interface ClientProfile {
   id: string
   user_id: string
   name: string
+  age: number | null
   location: string
   bio?: string
   preferences?: string
+  photo_url: string | null
   created_at: string
 }
 
@@ -88,10 +90,27 @@ export default function ClientProfilePage() {
         </div>
 
         <div className="space-y-6 rounded-lg border bg-card p-6">
+          {profile?.photo_url && (
+            <div className="flex justify-center">
+              <img
+                src={profile.photo_url}
+                alt={profile.name}
+                className="h-32 w-32 rounded-full object-cover border-4 border-primary/10"
+              />
+            </div>
+          )}
+
           <div>
             <h2 className="text-sm font-medium text-muted-foreground">Name</h2>
             <p className="mt-1 text-lg">{profile?.name}</p>
           </div>
+
+          {profile?.age && (
+            <div>
+              <h2 className="text-sm font-medium text-muted-foreground">Age</h2>
+              <p className="mt-1 text-lg">{profile.age}</p>
+            </div>
+          )}
 
           <div>
             <h2 className="text-sm font-medium text-muted-foreground">Location</h2>

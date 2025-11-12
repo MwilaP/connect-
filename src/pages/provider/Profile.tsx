@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Badge } from "../../../components/ui/badge"
 import { useSupabase } from "../../SupabaseContext"
+import { getProviderAge } from "../../../lib/age-utils"
 import type { User } from "@supabase/supabase-js"
 import type { ProviderProfile } from "../../../lib/types"
 
@@ -25,7 +27,10 @@ export default function ProviderProfilePage() {
       // Check if provider profile exists
       const { data: profileData } = await supabase
         .from("provider_profiles")
-        .select("*")
+        .select(`
+          *,
+          services:provider_services(*)
+        `)
         .eq("user_id", user.id)
         .single()
       
@@ -87,19 +92,46 @@ export default function ProviderProfilePage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Age</p>
-                <p className="text-lg">{profile?.age} years old</p>
-              </div>
+              {profile && getProviderAge(profile) && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Age</p>
+                  <p className="text-lg">{getProviderAge(profile)} years old</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Location</p>
                 <p className="text-lg">{profile?.location}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Hourly Rate</p>
-                <p className="text-lg">${profile?.hourly_rate}/hour</p>
-              </div>
+              {profile?.contact_number && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Contact Number</p>
+                  <p className="text-lg">{profile.contact_number}</p>
+                </div>
+              )}
             </div>
+
+            {profile?.services && profile.services.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">Services Offered</p>
+                <div className="space-y-3">
+                  {profile.services.map((service) => (
+                    <div key={service.id} className="rounded-lg border p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium">{service.service_name}</p>
+                          {service.description && (
+                            <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="ml-4">
+                          K{service.price}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {profile?.bio && (
               <div>

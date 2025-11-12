@@ -21,10 +21,13 @@ export default function EditProviderProfilePage() {
       
       const supabase = createClient()
       
-      // Get profile
+      // Get profile with services
       const { data: profileData } = await supabase
         .from("provider_profiles")
-        .select("*")
+        .select(`
+          *,
+          services:provider_services(*)
+        `)
         .eq("user_id", user.id)
         .maybeSingle()
       

@@ -2,9 +2,12 @@ import { useEffect, useState } from "react"
 import { useSearchParams, Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
 import { useSupabase } from "../../SupabaseContext"
+import { useSubscription } from "../../hooks/useSubscription"
 import { ProviderCard } from "../../../components/provider-card"
 import { ProviderFilters } from "../../../components/provider-filters"
 import { Button } from "../../../components/ui/button"
+import { SubscriptionBanner } from "../../components/SubscriptionBanner"
+import { PaymentModal } from "../../components/PaymentModal"
 import type { ProviderProfile } from "../../../lib/types"
 import type { User } from "@supabase/supabase-js"
 
@@ -12,11 +15,13 @@ export default function BrowseListPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { user, signOut } = useSupabase()
+  const { subscriptionStatus, subscribe } = useSubscription()
   const [providers, setProviders] = useState<ProviderProfile[]>([])
   const [userRole, setUserRole] = useState<string | null>(null)
   const [hasProviderProfile, setHasProviderProfile] = useState(false)
   const [hasClientProfile, setHasClientProfile] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -43,24 +48,20 @@ export default function BrowseListPage() {
       }
 
       // Build query with filters
-      let query = supabase.from("provider_profiles").select("*").order("created_at", { ascending: false })
+      let query = supabase
+        .from("provider_profiles")
+        .select(`
+          *,
+          services:provider_services(*)
+        `)
+        .order("created_at", { ascending: false })
 
       const location = searchParams.get("location")
-      const minRate = searchParams.get("minRate")
-      const maxRate = searchParams.get("maxRate")
       const minAge = searchParams.get("minAge")
       const maxAge = searchParams.get("maxAge")
 
       if (location) {
         query = query.ilike("location", `%${location}%`)
-      }
-
-      if (minRate) {
-        query = query.gte("hourly_rate", Number.parseFloat(minRate))
-      }
-
-      if (maxRate) {
-        query = query.lte("hourly_rate", Number.parseFloat(maxRate))
       }
 
       if (minAge) {
@@ -144,6 +145,15 @@ export default function BrowseListPage() {
           <p className="mt-2 text-muted-foreground">Find the perfect service provider for your needs</p>
         </div>
 
+        {/* Subscription Banner for non-subscribed clients */}
+        {user && userRole === "client" && !subscriptionStatus.hasActiveSubscription && (
+          <SubscriptionBanner
+            viewsRemaining={subscriptionStatus.dailyViewsLimit - subscriptionStatus.dailyViewsCount}
+            viewsLimit={subscriptionStatus.dailyViewsLimit}
+            onUpgrade={() => setShowPaymentModal(true)}
+          />
+        )}
+
         {/* Filters */}
         <ProviderFilters />
 
@@ -156,7 +166,11 @@ export default function BrowseListPage() {
               </p>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {providers.map((provider) => (
-                  <ProviderCard key={provider.id} provider={provider} />
+                  <ProviderCard 
+                    key={provider.id} 
+                    provider={provider}
+                    blurred={!!(user && userRole === "client" && !subscriptionStatus.hasActiveSubscription)}
+                  />
                 ))}
               </div>
             </>
@@ -168,6 +182,21 @@ export default function BrowseListPage() {
           )}
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={100}
+        purpose="subscription"
+        onSuccess={async (paymentMethod) => {
+          const success = await subscribe(paymentMethod);
+          if (success) {
+            setShowPaymentModal(false);
+          }
+          return success;
+        }}
+      />
     </div>
   )
 }
