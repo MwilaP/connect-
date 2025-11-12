@@ -55,6 +55,9 @@ export default function SubscriptionPage() {
             <Button variant="ghost" asChild>
               <Link to="/client/profile">My Profile</Link>
             </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/referrals">Referrals</Link>
+            </Button>
             <Button variant="ghost" onClick={handleSignOut}>
               Sign Out
             </Button>

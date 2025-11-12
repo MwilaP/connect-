@@ -26,6 +26,9 @@ import NewProviderProfile from './pages/provider/NewProfile'
 import EditProviderProfile from './pages/provider/EditProfile'
 import ProviderDashboard from './pages/provider/Dashboard'
 
+// Referral Pages
+import ReferralDashboard from './pages/ReferralDashboard'
+
 function App() {
   const { user, loading } = useSupabase()
 
@@ -59,6 +62,9 @@ function App() {
       <Route path="/provider/profile" element={<ProviderProfile />} />
       <Route path="/provider/profile/new" element={<NewProviderProfile />} />
       <Route path="/provider/profile/edit" element={<EditProviderProfile />} />
+      
+      {/* Referral Routes */}
+      <Route path="/referrals" element={<ReferralDashboard />} />
       
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

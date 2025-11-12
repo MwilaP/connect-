@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group"
-import { Link, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { Alert, AlertDescription } from "../../../components/ui/alert"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Gift } from "lucide-react"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
@@ -15,7 +17,34 @@ export default function SignupPage() {
   const [role, setRole] = useState<"client" | "provider">("client")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchParams] = useSearchParams()
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [referralValid, setReferralValid] = useState<boolean | null>(null)
   const navigate = useNavigate()
+
+  // Check for referral code in URL
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (refCode) {
+      setReferralCode(refCode)
+      validateReferralCode(refCode)
+    }
+  }, [searchParams])
+
+  const validateReferralCode = async (code: string) => {
+    const supabase = createClient()
+    try {
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('id')
+        .eq('referral_code', code.toUpperCase())
+        .single()
+
+      setReferralValid(!!data && !error)
+    } catch (err) {
+      setReferralValid(false)
+    }
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +79,29 @@ export default function SignupPage() {
       if (error) throw error
 
       if (data.user) {
+        // Initialize user (create referral code, etc.)
+        try {
+          await supabase.rpc('handle_new_user_signup', {
+            p_user_id: data.user.id
+          })
+        } catch (initError) {
+          console.error('Failed to initialize user:', initError)
+          // Don't block signup if initialization fails
+        }
+
+        // Track referral if referral code was provided
+        if (referralCode && referralValid) {
+          try {
+            await supabase.rpc('track_referral', {
+              p_referred_user_id: data.user.id,
+              p_referral_code: referralCode.toUpperCase(),
+            })
+          } catch (refError) {
+            console.error('Failed to track referral:', refError)
+            // Don't block signup if referral tracking fails
+          }
+        }
+        
         navigate("/auth/signup-success")
       }
     } catch (error: unknown) {
@@ -70,6 +122,22 @@ export default function SignupPage() {
           <CardContent>
             <form onSubmit={handleSignup}>
               <div className="flex flex-col gap-6">
+                {referralCode && referralValid && (
+                  <Alert className="bg-green-50 border-green-200">
+                    <Gift className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      You're signing up with referral code <strong>{referralCode}</strong>. 
+                      Your referrer will earn rewards when you subscribe!
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {referralCode && referralValid === false && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      Invalid referral code. You can still sign up without it.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="grid gap-2">
                   <Label>I want to</Label>
                   <RadioGroup value={role} onValueChange={(value) => setRole(value as "client" | "provider")}>

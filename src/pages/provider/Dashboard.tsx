@@ -185,6 +185,9 @@ export default function ProviderDashboardPage() {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/provider/profile">My Profile</Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/referrals">Referrals</Link>
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               Sign Out
             </Button>
@@ -210,6 +213,9 @@ export default function ProviderDashboardPage() {
               </Button>
               <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
                 <Link to="/provider/profile">My Profile</Link>
+              </Button>
+              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/referrals">Referrals</Link>
               </Button>
               <Button variant="ghost" className="justify-start" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
                 Sign Out

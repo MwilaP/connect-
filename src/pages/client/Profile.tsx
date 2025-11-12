@@ -65,6 +65,12 @@ export default function ClientProfilePage() {
             <Button variant="ghost" asChild>
               <Link to="/browse">Browse</Link>
             </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/client/subscription">Subscription</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/referrals">Referrals</Link>
+            </Button>
             <Button variant="ghost" onClick={handleSignOut}>
               Sign Out
             </Button>
