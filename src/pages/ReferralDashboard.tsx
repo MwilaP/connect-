@@ -4,11 +4,14 @@ import { useSupabase } from '../contexts/SupabaseContext';
 import { useReferral } from '../hooks/use-referral';
 import { useToast } from '../../hooks/use-toast';
 import { PageLoader } from '../components/PageLoader';
+import { ReferralAccessPaymentModal } from '../components/ReferralAccessPaymentModal';
+import { WithdrawalRequestModal } from '../components/WithdrawalRequestModal';
+import { WithdrawalHistory } from '../components/WithdrawalHistory';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Menu } from 'lucide-react';
+import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Menu, Lock, CreditCard, Crown } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 
@@ -22,14 +25,18 @@ export default function ReferralDashboard() {
     rewards,
     loading,
     error,
+    access,
     getReferralLink,
     copyReferralLink,
     shareReferralLink,
+    refresh,
   } = useReferral();
   const { toast } = useToast();
   const [copying, setCopying] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -169,6 +176,84 @@ export default function ReferralDashboard() {
         </p>
       </div>
 
+      {/* Access Restriction Messages */}
+      {access && !access.hasAccess && (
+        <Card className="mb-8 border-2 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold mb-2">
+                  {user?.user_metadata?.role === 'provider' 
+                    ? 'Unlock Referral Program' 
+                    : 'Subscribe to Access Referrals'}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {access.message}
+                </p>
+                {user?.user_metadata?.role === 'provider' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>One-time payment of K30 for lifetime access</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Earn K20,000 for each successful referral</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Unlimited referral link sharing</span>
+                    </div>
+                    <Button 
+                      size="lg" 
+                      className="mt-4"
+                      onClick={() => setShowPaymentModal(true)}
+                    >
+                      <CreditCard className="mr-2 h-5 w-5" />
+                      Pay K30 to Unlock
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Subscribe to unlock the referral program</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Earn K20,000 for each friend who subscribes</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Access available as long as subscription is active</span>
+                    </div>
+                    <Button 
+                      size="lg" 
+                      className="mt-4"
+                      asChild
+                    >
+                      <Link to="/client/subscription">
+                        <Crown className="mr-2 h-5 w-5" />
+                        View Subscription Plans
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Only show referral content if user has access */}
+      {access?.hasAccess && (
+        <>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
@@ -199,22 +284,22 @@ export default function ReferralDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+            <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {stats?.total_earnings?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              All time earnings
+              ≈ K{((stats?.total_earnings || 0) / 1000).toFixed(2)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Earnings</CardTitle>
+            <CardTitle className="text-sm font-medium">Available to Withdraw</CardTitle>
             <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -227,6 +312,47 @@ export default function ReferralDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Withdrawal Section */}
+      <Card className="mb-8 border-2 border-primary/20">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Withdraw Your Earnings
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Convert your points to cash (20,000 points = K20)
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-primary">
+                  {stats?.pending_earnings?.toLocaleString() || 0} pts
+                </span>
+                <span className="text-muted-foreground">
+                  ≈ K{((stats?.pending_earnings || 0) / 1000).toFixed(2)} available
+                </span>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => setShowWithdrawalModal(true)}
+              disabled={!stats?.pending_earnings || stats.pending_earnings < 10000}
+              className="w-full md:w-auto"
+            >
+              <DollarSign className="mr-2 h-5 w-5" />
+              Withdraw to Mobile Money
+            </Button>
+          </div>
+          {stats && stats.pending_earnings < 10000 && (
+            <Alert className="mt-4">
+              <AlertDescription className="text-xs">
+                Minimum withdrawal is 10,000 points (K10). Keep referring to reach the minimum!
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Referral Link Section */}
       <Card className="mb-8">
@@ -284,11 +410,12 @@ export default function ReferralDashboard() {
         </CardContent>
       </Card>
 
-      {/* Tabs for Referrals and Rewards */}
+      {/* Tabs for Referrals, Rewards, and Withdrawals */}
       <Tabs defaultValue="referrals" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="referrals">My Referrals</TabsTrigger>
           <TabsTrigger value="rewards">My Rewards</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="referrals" className="mt-6">
@@ -425,8 +552,40 @@ export default function ReferralDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="withdrawals" className="mt-6">
+          <WithdrawalHistory />
+        </TabsContent>
       </Tabs>
+      </>
+      )}
       </div>
+
+      {/* Payment Modal */}
+      <ReferralAccessPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          refresh();
+          toast({
+            title: 'Success!',
+            description: 'You now have access to the referral program',
+          });
+        }}
+      />
+
+      {/* Withdrawal Modal */}
+      <WithdrawalRequestModal
+        isOpen={showWithdrawalModal}
+        onClose={() => setShowWithdrawalModal(false)}
+        onSuccess={() => {
+          refresh();
+          toast({
+            title: 'Withdrawal Requested!',
+            description: 'Your withdrawal will be processed within 24-48 hours',
+          });
+        }}
+      />
     </div>
   );
 }

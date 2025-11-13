@@ -20,12 +20,12 @@ export interface ReferralReward {
   id: string;
   referrer_id: string;
   referral_id: string;
-  amount: number;
-  status: 'pending' | 'paid' | 'cancelled';
+  points: number; // Points earned (20000 points = K20)
+  amount: number; // Cash equivalent in Kwacha
+  status: 'pending' | 'approved' | 'withdrawn' | 'cancelled';
   created_at: string;
-  paid_at?: string;
-  payment_method?: string;
-  payment_reference?: string;
+  approved_at?: string;
+  withdrawn_at?: string;
 }
 
 export interface ReferralStats {
@@ -44,4 +44,20 @@ export interface ReferralWithDetails extends Referral {
 
 export interface ReferralRewardWithDetails extends ReferralReward {
   referral?: Referral;
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  user_id: string;
+  points: number;
+  amount: number;
+  payment_method: string;
+  phone_number: string;
+  status: 'pending' | 'processing' | 'completed' | 'rejected';
+  created_at: string;
+  processed_at?: string;
+  completed_at?: string;
+  transaction_reference?: string;
+  admin_notes?: string;
+  rejection_reason?: string;
 }

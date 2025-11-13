@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { createClient } from '../../lib/supabase/client';
 import type { ReferralCode, ReferralStats, Referral, ReferralReward } from '../../lib/types/referral';
 
+export interface ReferralAccess {
+  hasAccess: boolean;
+  accessType: 'subscription' | 'payment' | 'none';
+  message: string;
+}
+
 export function useReferral() {
   const [referralCode, setReferralCode] = useState<ReferralCode | null>(null);
   const [stats, setStats] = useState<ReferralStats | null>(null);
@@ -9,7 +15,32 @@ export function useReferral() {
   const [rewards, setRewards] = useState<ReferralReward[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [access, setAccess] = useState<ReferralAccess | null>(null);
   const supabase = createClient();
+
+  // Check if user has access to referral program
+  const checkAccess = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .rpc('check_referral_access', { p_user_id: user.id });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setAccess({
+          hasAccess: data[0].has_access,
+          accessType: data[0].access_type,
+          message: data[0].message,
+        });
+      }
+    } catch (err) {
+      console.error('Error checking access:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check access');
+    }
+  };
 
   // Get user's referral code
   const fetchReferralCode = async () => {
@@ -206,6 +237,7 @@ export function useReferral() {
   const refresh = async () => {
     setLoading(true);
     setError(null);
+    await checkAccess();
     await Promise.all([
       fetchReferralCode(),
       fetchStats(),
@@ -226,6 +258,7 @@ export function useReferral() {
     rewards,
     loading,
     error,
+    access,
     trackReferral,
     validateReferralCode,
     getReferralLink,
