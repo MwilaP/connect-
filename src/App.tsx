@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSupabase } from './contexts/SupabaseContext'
+import { LoadingScreen } from './components/LoadingScreen'
 
 // Auth Pages
 import Login from './pages/auth/Login'
@@ -33,7 +34,7 @@ function App() {
   const { user, loading } = useSupabase()
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+    return <LoadingScreen user={user} message="Initializing application..." />
   }
 
   return (

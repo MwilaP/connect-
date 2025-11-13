@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useReferral } from '@/hooks/use-referral';
 import { useSupabase } from '../contexts/SupabaseContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { useReferral } from '../hooks/use-referral';
+import { useToast } from '../../hooks/use-toast';
+import { PageLoader } from '../components/PageLoader';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Menu } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Menu } from 'lucide-react';
-import { useToast } from '../../hooks/use-toast';
 
 export default function ReferralDashboard() {
   const navigate = useNavigate();
@@ -67,9 +68,21 @@ export default function ReferralDashboard() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen">
+        <header className="border-b bg-background sticky top-0 z-50">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link to="/" className="text-xl font-semibold">
+              ConnectPro
+            </Link>
+            <nav className="flex items-center gap-4">
+              <Button variant="ghost" disabled>
+                Loading...
+              </Button>
+            </nav>
+          </div>
+        </header>
+        <div className="container mx-auto py-8 px-4">
+          <PageLoader message="Loading referral dashboard..." />
         </div>
       </div>
     );

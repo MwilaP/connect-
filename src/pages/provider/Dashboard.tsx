@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
+import { useSupabase } from "../../contexts/SupabaseContext"
+import { LoadingScreen } from "../../components/LoadingScreen"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Eye, TrendingUp, Calendar, User as UserIcon, Clock, X, Menu } from "lucide-react"
-import { Badge } from "../../../components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog"
-import { useSupabase } from "../../contexts/SupabaseContext"
+import { Eye, TrendingUp, Calendar, User as UserIcon, Clock, X, Menu } from "lucide-react"
+import { Badge } from "../../../components/ui/badge"
 import { getProviderAge } from "../../../lib/age-utils"
 import { formatLocation } from "../../../lib/location-data"
 import type { User } from "@supabase/supabase-js"
@@ -165,7 +166,7 @@ export default function ProviderDashboardPage() {
   }
 
   if (dashboardLoading || !user) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+    return <LoadingScreen user={user} message="Loading dashboard..." />
   }
 
   return (

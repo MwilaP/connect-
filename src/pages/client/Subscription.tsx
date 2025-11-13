@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { useSubscription } from '../../hooks/useSubscription';
+import { PageLoader } from '../../components/PageLoader';
 import { Button } from '../../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
 import { PaymentModal } from '../../components/PaymentModal';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../components/ui/alert-dialog';
 import { Crown, Calendar, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
 export default function SubscriptionPage() {
@@ -27,7 +29,25 @@ export default function SubscriptionPage() {
   };
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen">
+        <header className="border-b bg-background sticky top-0 z-50">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link to="/" className="text-xl font-semibold">
+              ConnectPro
+            </Link>
+            <nav className="flex items-center gap-4">
+              <Button variant="ghost" disabled>
+                Loading...
+              </Button>
+            </nav>
+          </div>
+        </header>
+        <div className="container mx-auto py-8 px-4">
+          <PageLoader message="Loading subscription..." />
+        </div>
+      </div>
+    );
   }
 
   const subscription = subscriptionStatus.subscription;

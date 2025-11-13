@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
 import { useSupabase } from "../../contexts/SupabaseContext"
 import { useSubscription } from "../../hooks/useSubscription"
+import { PageLoader } from "../../components/PageLoader"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { PaymentModal } from "../../components/PaymentModal"
@@ -152,7 +153,25 @@ export default function ProviderDetailPage() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen">
+        <header className="border-b bg-background sticky top-0 z-50">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link to="/" className="text-xl font-semibold">
+              ConnectPro
+            </Link>
+            <nav className="flex items-center gap-4">
+              <Button variant="ghost" asChild>
+                <Link to="/browse">Back to Browse</Link>
+              </Button>
+            </nav>
+          </div>
+        </header>
+        <div className="container mx-auto py-8 px-4">
+          <PageLoader message="Loading provider details..." />
+        </div>
+      </div>
+    );
   }
 
   if (error || !provider) {

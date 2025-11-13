@@ -8,6 +8,7 @@ import { ProviderFilters } from "../../../components/provider-filters"
 import { Button } from "../../../components/ui/button"
 import { SubscriptionBanner } from "../../components/SubscriptionBanner"
 import { PaymentModal } from "../../components/PaymentModal"
+import { PageLoader } from "../../components/PageLoader"
 import type { ProviderProfile } from "../../../lib/types"
 import type { User } from "@supabase/supabase-js"
 
@@ -91,10 +92,6 @@ export default function BrowseListPage() {
     navigate("/auth/login")
   }
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
-  }
-
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -159,7 +156,9 @@ export default function BrowseListPage() {
 
         {/* Results */}
         <div className="mt-8">
-          {providers && providers.length > 0 ? (
+          {loading ? (
+            <PageLoader message="Loading providers..." variant="skeleton" />
+          ) : providers && providers.length > 0 ? (
             <>
               <p className="mb-4 text-sm text-muted-foreground">
                 {providers.length} provider{providers.length !== 1 ? "s" : ""} found
