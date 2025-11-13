@@ -8,13 +8,15 @@ export default function SignupSuccessPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>We&apos;ve sent you a confirmation link</CardDescription>
+            <CardTitle className="text-2xl">Account Created!</CardTitle>
+            <CardDescription>Welcome to ConnectPro</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Please check your email and click the confirmation link to activate your account. Once confirmed, you can
-              log in and start using the platform.
+              Your account has been created successfully. You can now log in and complete your profile to start using the platform.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Note: If email confirmation is enabled, please check your email for a confirmation link.
             </p>
             <Button asChild className="w-full">
               <Link to="/auth/login">Go to Login</Link>

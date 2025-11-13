@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
-import { useSupabase } from "../../SupabaseContext"
+import { useSupabase } from "../../contexts/SupabaseContext"
 import { useSubscription } from "../../hooks/useSubscription"
 import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"

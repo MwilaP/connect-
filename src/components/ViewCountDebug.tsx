@@ -1,5 +1,5 @@
 import { useSubscription } from '../hooks/useSubscription';
-import { useSupabase } from '../SupabaseContext';
+import { useSupabase } from '../contexts/SupabaseContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Eye, CheckCircle, XCircle } from 'lucide-react';
 

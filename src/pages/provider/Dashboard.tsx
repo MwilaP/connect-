@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog"
-import { useSupabase } from "../../SupabaseContext"
+import { useSupabase } from "../../contexts/SupabaseContext"
 import { getProviderAge } from "../../../lib/age-utils"
 import { formatLocation } from "../../../lib/location-data"
 import type { User } from "@supabase/supabase-js"

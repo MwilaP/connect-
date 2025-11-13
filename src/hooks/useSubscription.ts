@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '../../lib/supabase/client';
-import { useSupabase } from '../SupabaseContext';
+import { useSupabase } from '../contexts/SupabaseContext';
 import type { Subscription, SubscriptionStatus } from '../../lib/types/subscription';
 
 const DAILY_FREE_VIEWS_LIMIT = 3;

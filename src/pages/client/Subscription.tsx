@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSupabase } from '../../SupabaseContext';
+import { useSupabase } from '../../contexts/SupabaseContext';
 import { useSubscription } from '../../hooks/useSubscription';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';

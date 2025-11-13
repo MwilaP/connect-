@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useSearchParams, Link, useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
-import { useSupabase } from "../../SupabaseContext"
+import { useSupabase } from "../../contexts/SupabaseContext"
 import { useSubscription } from "../../hooks/useSubscription"
 import { ProviderCard } from "../../../components/provider-card"
 import { ProviderFilters } from "../../../components/provider-filters"

@@ -73,6 +73,8 @@ export default function SignupPage() {
             role: role,
           },
           emailRedirectTo: `${window.location.origin}/browse`,
+          // Disable email confirmation - user can login immediately
+          emailConfirmation: false,
         },
       })
 
@@ -102,7 +104,12 @@ export default function SignupPage() {
           }
         }
         
-        navigate("/auth/signup-success")
+        // Redirect to profile creation based on role
+        if (role === "provider") {
+          navigate("/provider/profile/new")
+        } else {
+          navigate("/client/profile/new")
+        }
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
 import { ProviderProfileForm } from "../../../components/provider-profile-form"
-import { useSupabase } from "../../SupabaseContext"
+import { useSupabase } from "../../contexts/SupabaseContext"
 import type { User } from "@supabase/supabase-js"
 
 export default function NewProviderProfilePage() {

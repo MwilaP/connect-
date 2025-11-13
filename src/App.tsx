@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useSupabase } from './SupabaseContext'
+import { useSupabase } from './contexts/SupabaseContext'
 
 // Auth Pages
 import Login from './pages/auth/Login'
