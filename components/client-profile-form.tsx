@@ -144,14 +144,14 @@ export function ClientProfileForm({ profile }: ClientProfileFormProps) {
         const { error: updateError } = await supabase.from("client_profiles").update(profileData).eq("id", profile.id)
 
         if (updateError) throw updateError
+        navigate("/client/profile")
       } else {
         // Create new profile
         const { error: insertError } = await supabase.from("client_profiles").insert(profileData)
 
         if (insertError) throw insertError
+        navigate("/browse")
       }
-
-      navigate("/client/profile")
     } catch (err) {
       console.error("[v0] Error saving profile:", err)
       setError(err instanceof Error ? err.message : "Failed to save profile")
