@@ -453,6 +453,7 @@ export default function ProviderDetailPage() {
         amount={30}
         purpose="contact_unlock"
         providerName={provider?.name}
+        providerId={id}
         onSuccess={async (paymentMethod) => {
           if (!id) return false
           const success = await unlockContact(id)

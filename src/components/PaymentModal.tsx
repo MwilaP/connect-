@@ -4,7 +4,10 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { CreditCard, Smartphone, CheckCircle2, Loader2 } from 'lucide-react';
+import { CreditCard, Smartphone, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { useSupabase } from '../contexts/SupabaseContext';
+import { lencoPayService } from '../services/lencopay.service';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -13,6 +16,7 @@ interface PaymentModalProps {
   purpose: 'subscription' | 'contact_unlock';
   onSuccess: (paymentMethod: 'mobile_money' | 'card') => Promise<boolean>;
   providerName?: string;
+  providerId?: string;
 }
 
 export function PaymentModal({
@@ -22,11 +26,16 @@ export function PaymentModal({
   purpose,
   onSuccess,
   providerName,
+  providerId,
 }: PaymentModalProps) {
+  const { user } = useSupabase();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [paymentMethod, setPaymentMethod] = useState<'mobile_money' | 'card'>('mobile_money');
   const [isProcessing, setIsProcessing] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [operator, setOperator] = useState<'mtn' | 'airtel' | 'zamtel'>('airtel');
+  const [paymentReference, setPaymentReference] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
@@ -37,29 +46,121 @@ export function PaymentModal({
   };
 
   const handlePayment = async () => {
+    if (!user) {
+      setError('You must be logged in to make a payment');
+      return;
+    }
+
+    // Validate phone number for mobile money
+    if (paymentMethod === 'mobile_money') {
+      if (!lencoPayService.isValidZambianPhone(phoneNumber)) {
+        setError('Please enter a valid Zambian phone number (e.g., 0977123456)');
+        return;
+      }
+    }
+
     setIsProcessing(true);
+    setError('');
 
-    // Simulate payment processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      let response;
 
-    const success = await onSuccess(paymentMethod);
+      if (paymentMethod === 'mobile_money') {
+        // Initiate payment with Lencopay API
+        if (purpose === 'subscription') {
+          response = await lencoPayService.initiateSubscriptionPayment({
+            userId: user.id,
+            email: user.email || '',
+            phone: phoneNumber,
+            operator,
+          });
+        } else {
+          if (!providerId) {
+            setError('Provider ID is required for contact unlock');
+            setIsProcessing(false);
+            return;
+          }
+          response = await lencoPayService.initiateContactUnlockPayment({
+            userId: user.id,
+            email: user.email || '',
+            phone: phoneNumber,
+            operator,
+            providerId,
+          });
+        }
 
-    setIsProcessing(false);
+        if (!response.success || !response.data) {
+          setError(response.error?.message || 'Failed to initiate payment');
+          setIsProcessing(false);
+          return;
+        }
 
-    if (success) {
-      setStep(3);
-    } else {
-      alert('Payment failed. Please try again.');
+        setPaymentReference(response.data.reference);
+
+        // Show waiting message
+        setError('Please check your phone and approve the payment prompt...');
+
+        // Poll for payment status
+        const statusResponse = await lencoPayService.pollPaymentStatus(
+          response.data.reference,
+          30, // 30 attempts
+          10000 // 10 seconds interval
+        );
+
+        if (statusResponse.success && statusResponse.data?.status === 'completed') {
+          // Payment successful
+          const success = await onSuccess(paymentMethod);
+          if (success) {
+            setStep(3);
+          } else {
+            setError('Payment completed but failed to update subscription. Please contact support.');
+          }
+        } else {
+          setError(
+            statusResponse.data?.status === 'failed'
+              ? 'Payment failed. Please try again.'
+              : 'Payment verification timed out. Please check your payment status.'
+          );
+        }
+      } else {
+        // Card payment (simulated for now)
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const success = await onSuccess(paymentMethod);
+        if (success) {
+          setStep(3);
+        } else {
+          setError('Payment failed. Please try again.');
+        }
+      }
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleClose = () => {
-    setStep(1);
-    setPhoneNumber('');
-    setCardNumber('');
-    setExpiryDate('');
-    setCvv('');
-    onClose();
+    if (!isProcessing) {
+      setStep(1);
+      setPhoneNumber('');
+      setOperator('airtel');
+      setPaymentReference('');
+      setError('');
+      setCardNumber('');
+      setExpiryDate('');
+      setCvv('');
+      onClose();
+    }
+  };
+
+  // Auto-detect operator when phone number changes
+  const handlePhoneChange = (value: string) => {
+    setPhoneNumber(value);
+    const detectedOperator = lencoPayService.detectOperator(value);
+    if (detectedOperator) {
+      setOperator(detectedOperator);
+    }
   };
 
   return (
@@ -124,7 +225,7 @@ export function PaymentModal({
             </div>
 
             {paymentMethod === 'mobile_money' ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="phone">Mobile Money Number</Label>
                   <Input
@@ -132,11 +233,54 @@ export function PaymentModal({
                     type="tel"
                     placeholder="0977 123 456"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     className="mt-1"
+                    disabled={isProcessing}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    You'll receive a prompt to confirm payment
+                    Enter your Airtel, MTN, or Zamtel number
+                  </p>
+                </div>
+
+                <div>
+                  <Label>Mobile Money Operator</Label>
+                  <RadioGroup
+                    value={operator}
+                    onValueChange={(value) => setOperator(value as 'mtn' | 'airtel' | 'zamtel')}
+                    className="mt-2 space-y-2"
+                    disabled={isProcessing}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="airtel" id="airtel" />
+                      <Label htmlFor="airtel" className="font-normal cursor-pointer">
+                        Airtel Money
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="mtn" id="mtn" />
+                      <Label htmlFor="mtn" className="font-normal cursor-pointer">
+                        MTN Mobile Money
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="zamtel" id="zamtel" />
+                      <Label htmlFor="zamtel" className="font-normal cursor-pointer">
+                        Zamtel Kwacha
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {error && (
+                  <Alert variant={error.includes('check your phone') ? 'default' : 'destructive'}>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="rounded-lg bg-blue-50 dark:bg-blue-950 p-3 border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                    💡 You'll receive a prompt on your phone to approve the payment
                   </p>
                 </div>
               </div>
@@ -185,18 +329,23 @@ export function PaymentModal({
             )}
 
             <div className="flex gap-3 pt-4">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="flex-1"
+                disabled={isProcessing}
+              >
                 Back
               </Button>
               <Button
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || (paymentMethod === 'mobile_money' && !phoneNumber)}
                 className="flex-1"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    {paymentReference ? 'Waiting for approval...' : 'Processing...'}
                   </>
                 ) : (
                   `Pay K${amount}`

@@ -90,7 +90,7 @@ CREATE POLICY "Users can insert their own profile views"
   ON profile_views_tracking FOR INSERT
   WITH CHECK (auth.uid() = client_id);
 
--- RLS Policies for payments
+-- RLS Policies for payments 
 CREATE POLICY "Users can view their own payments"
   ON payments FOR SELECT
   USING (auth.uid() = user_id);
