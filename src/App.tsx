@@ -31,6 +31,16 @@ import ProviderDashboard from './pages/provider/Dashboard'
 // Referral Pages
 import ReferralDashboard from './pages/ReferralDashboard'
 
+// Admin Pages
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/Dashboard'
+import UsersManagement from './pages/admin/UsersManagement'
+import ProvidersManagement from './pages/admin/ProvidersManagement'
+import SubscriptionsManagement from './pages/admin/SubscriptionsManagement'
+import PaymentsManagement from './pages/admin/PaymentsManagement'
+import WithdrawalsManagement from './pages/admin/WithdrawalsManagement'
+import ReferralRewardsAdmin from './pages/admin/ReferralRewardsAdmin'
+
 function App() {
   const { user, loading: userLoading } = useSupabase()
   const { loading: subscriptionLoading } = useSubscription()
@@ -69,6 +79,17 @@ function App() {
       
       {/* Referral Routes */}
       <Route path="/referrals" element={<ReferralDashboard />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<UsersManagement />} />
+        <Route path="providers" element={<ProvidersManagement />} />
+        <Route path="subscriptions" element={<SubscriptionsManagement />} />
+        <Route path="payments" element={<PaymentsManagement />} />
+        <Route path="withdrawals" element={<WithdrawalsManagement />} />
+        <Route path="referrals" element={<ReferralRewardsAdmin />} />
+      </Route>
       
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
