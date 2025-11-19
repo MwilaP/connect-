@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSupabase } from './contexts/SupabaseContext'
+import { useSubscription } from './hooks/useSubscription'
 import { LoadingScreen } from './components/LoadingScreen'
 
 // Auth Pages
@@ -31,9 +32,11 @@ import ProviderDashboard from './pages/provider/Dashboard'
 import ReferralDashboard from './pages/ReferralDashboard'
 
 function App() {
-  const { user, loading } = useSupabase()
+  const { user, loading: userLoading } = useSupabase()
+  const { loading: subscriptionLoading } = useSubscription()
 
-  if (loading) {
+  // Wait for both user and subscription data to load
+  if (userLoading || (user && subscriptionLoading)) {
     return <LoadingScreen user={user} message="Initializing application..." />
   }
 
