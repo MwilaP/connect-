@@ -186,7 +186,7 @@ export default function BrowseListPage() {
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        amount={100}
+        amount={5}
         purpose="subscription"
         onSuccess={async (paymentMethod) => {
           const success = await subscribe(paymentMethod);

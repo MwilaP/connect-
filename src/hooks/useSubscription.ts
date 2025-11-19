@@ -151,35 +151,26 @@ export function useSubscription() {
   const unlockContact = async (providerId: string): Promise<boolean> => {
     if (!user) return false;
 
-    const supabase = createClient();
-
     try {
-      // Create payment record
-      const { data: payment } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          amount: 30,
-          payment_type: 'contact_unlock',
-          provider_id: providerId,
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (!payment) return false;
-
-      // Create contact unlock record
-      await supabase.from('contact_unlocks').insert({
-        client_id: user.id,
-        provider_id: providerId,
-        amount: 30,
-      });
+      // Payment and contact unlock are already created by the payment API
+      // when the payment completes (via webhook or polling)
+      // We just need to verify the unlock was successful
+      console.log('Payment completed, verifying contact unlock...');
+      
+      // Wait a moment for the database to update
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Check if unlock was successful
+      const hasAccess = await checkContactUnlock(providerId);
+      
+      if (!hasAccess) {
+        console.error('Contact unlock not found after payment');
+        return false;
+      }
 
       return true;
     } catch (error) {
-      console.error('Error unlocking contact:', error);
+      console.error('Error verifying contact unlock:', error);
       return false;
     }
   };
@@ -187,48 +178,17 @@ export function useSubscription() {
   const subscribe = async (paymentMethod: 'mobile_money' | 'card'): Promise<boolean> => {
     if (!user) return false;
 
-    const supabase = createClient();
-
     try {
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1);
-
-      // Create payment record
-      const { data: payment } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          amount: 100,
-          payment_type: 'subscription',
-          payment_method: paymentMethod,
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (!payment) return false;
-
-      // Create or update subscription
-      const { error } = await supabase.from('subscriptions').upsert({
-        user_id: user.id,
-        active: true,
-        plan: 'monthly',
-        amount: 100,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
-      if (error) throw error;
-
-      // Refresh subscription status
+      // Payment and subscription are already created by the payment API
+      // when the payment completes (via webhook or polling)
+      // We just need to refresh the subscription status
+      console.log('Payment completed, refreshing subscription status...');
+      
       await fetchSubscriptionStatus();
 
       return true;
     } catch (error) {
-      console.error('Error subscribing:', error);
+      console.error('Error refreshing subscription:', error);
       return false;
     }
   };
