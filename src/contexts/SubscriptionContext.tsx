@@ -148,8 +148,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
         console.log(`✅ Tracked new view for provider ${providerId} on ${today}`);
 
-        // Refresh subscription status to update the count
-        await fetchSubscriptionStatus();
+        // Update the local state without refetching everything
+        setSubscriptionStatus(prev => ({
+          ...prev,
+          dailyViewsCount: prev.dailyViewsCount + 1,
+          canViewMore: prev.hasActiveSubscription || (prev.dailyViewsCount + 1) < DAILY_FREE_VIEWS_LIMIT,
+        }));
       } else {
         console.log(`ℹ️ Provider ${providerId} already viewed today`);
       }

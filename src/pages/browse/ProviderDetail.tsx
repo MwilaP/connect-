@@ -99,7 +99,7 @@ export default function ProviderDetailPage() {
     }
 
     fetchData()
-  }, [id, user])
+  }, [id, user, subscriptionStatus.hasActiveSubscription, subscriptionStatus.canViewMore])
 
   // Keyboard navigation for image modal
   useEffect(() => {
