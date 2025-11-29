@@ -119,20 +119,32 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Create Account</CardTitle>
-            <CardDescription>Join our marketplace as a client or provider</CardDescription>
+    <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background">
+      <div className="w-full max-w-md">
+        {/* Logo/Brand */}
+        <div className="flex items-center justify-center gap-2 mb-6 sm:mb-8">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+            <span className="text-xl sm:text-2xl font-bold text-primary-foreground">C</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            ConnectPro
+          </h1>
+        </div>
+        
+        <Card className="border-border/50 shadow-xl">
+          <CardHeader className="space-y-2 sm:space-y-3 pb-6">
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-center">Create Account</CardTitle>
+            <CardDescription className="text-center text-sm sm:text-base">
+              Join our marketplace as a client or provider
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <form onSubmit={handleSignup}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5 sm:gap-6">
                 {referralCode && referralValid && (
-                  <Alert className="bg-green-50 border-green-200">
-                    <Gift className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
+                  <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                    <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                    <AlertDescription className="text-green-800 dark:text-green-200 text-sm sm:text-base">
                       You're signing up with referral code <strong>{referralCode}</strong>. 
                       Your referrer will earn rewards when you subscribe!
                     </AlertDescription>
@@ -140,30 +152,30 @@ export default function SignupPage() {
                 )}
                 {referralCode && referralValid === false && (
                   <Alert variant="destructive">
-                    <AlertDescription>
+                    <AlertDescription className="text-sm sm:text-base">
                       Invalid referral code. You can still sign up without it.
                     </AlertDescription>
                   </Alert>
                 )}
-                <div className="grid gap-2">
-                  <Label>I want to</Label>
+                <div className="grid gap-3">
+                  <Label className="text-sm sm:text-base font-medium">I want to</Label>
                   <RadioGroup value={role} onValueChange={(value) => setRole(value as "client" | "provider")}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="client" id="client" />
-                      <Label htmlFor="client" className="font-normal">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="client" id="client" className="touch-target" />
+                      <Label htmlFor="client" className="font-normal text-sm sm:text-base cursor-pointer flex-1">
                         Browse and hire providers
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="provider" id="provider" />
-                      <Label htmlFor="provider" className="font-normal">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="provider" id="provider" className="touch-target" />
+                      <Label htmlFor="provider" className="font-normal text-sm sm:text-base cursor-pointer flex-1">
                         Offer my services as a provider
                       </Label>
                     </div>
                   </RadioGroup>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                <div className="grid gap-2.5">
+                  <Label htmlFor="email" className="text-sm sm:text-base font-medium">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -171,42 +183,62 @@ export default function SignupPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="h-11 sm:h-12 text-base"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                <div className="grid gap-2.5">
+                  <Label htmlFor="password" className="text-sm sm:text-base font-medium">Password</Label>
                   <Input
                     id="password"
                     type="password"
+                    placeholder="At least 6 characters"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 sm:h-12 text-base"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                <div className="grid gap-2.5">
+                  <Label htmlFor="confirm-password" className="text-sm sm:text-base font-medium">Confirm Password</Label>
                   <Input
                     id="confirm-password"
                     type="password"
+                    placeholder="Re-enter your password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="h-11 sm:h-12 text-base"
                   />
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {error && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                    <p className="text-sm text-destructive font-medium">{error}</p>
+                  </div>
+                )}
+                <Button 
+                  type="submit" 
+                  className="w-full touch-target h-11 sm:h-12 text-base font-semibold" 
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creating account..." : "Sign Up"}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <Link to="/auth/login" className="underline underline-offset-4">
+              <div className="mt-6 text-center text-sm sm:text-base">
+                <span className="text-muted-foreground">Already have an account?</span>{" "}
+                <Link to="/auth/login" className="font-semibold text-primary hover:underline underline-offset-4">
                   Login
                 </Link>
               </div>
             </form>
           </CardContent>
         </Card>
+        
+        {/* Back to home link */}
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors">
+            ← Back to home
+          </Link>
+        </div>
       </div>
     </div>
   )

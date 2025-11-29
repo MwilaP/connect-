@@ -9,6 +9,7 @@ import { Button } from "../../../components/ui/button"
 import { SubscriptionBanner } from "../../components/SubscriptionBanner"
 import { PaymentModal } from "../../components/PaymentModal"
 import { PageLoader } from "../../components/PageLoader"
+import { BottomNav } from "../../components/BottomNav"
 import type { ProviderProfile } from "../../../lib/types"
 import type { User } from "@supabase/supabase-js"
 
@@ -93,41 +94,48 @@ export default function BrowseListPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-xl font-semibold">
-            ConnectPro
+    <div className="min-h-screen pb-16 sm:pb-0">
+      {/* Simplified Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              ConnectPro
+            </h1>
           </Link>
-          <nav className="flex items-center gap-4">
+          
+          {/* Desktop Navigation Only */}
+          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
             {user ? (
               <>
                 {userRole === "provider" && hasProviderProfile && (
                   <>
-                    <Button variant="ghost" asChild>
+                    <Button variant="ghost" size="sm" className="touch-target" asChild>
                       <Link to="/provider/dashboard">Dashboard</Link>
                     </Button>
-                    <Button variant="ghost" asChild>
-                      <Link to="/provider/profile">My Profile</Link>
+                    <Button variant="ghost" size="sm" className="touch-target" asChild>
+                      <Link to="/provider/profile">Profile</Link>
                     </Button>
                   </>
                 )}
                 {userRole === "client" && hasClientProfile && (
-                  <Button variant="ghost" asChild>
-                    <Link to="/client/profile">My Profile</Link>
+                  <Button variant="ghost" size="sm" className="touch-target" asChild>
+                    <Link to="/client/profile">Profile</Link>
                   </Button>
                 )}
-                <Button variant="ghost" onClick={handleSignOut}>
+                <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
                   Sign Out
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" size="sm" className="touch-target" asChild>
                   <Link to="/auth/login">Login</Link>
                 </Button>
-                <Button asChild>
+                <Button size="sm" className="touch-target" asChild>
                   <Link to="/auth/signup">Sign Up</Link>
                 </Button>
               </>
@@ -136,10 +144,10 @@ export default function BrowseListPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Browse Providers</h1>
-          <p className="mt-2 text-muted-foreground">Find the perfect service provider for your needs</p>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Browse Providers</h1>
+          <p className="mt-2 text-sm sm:text-base text-muted-foreground">Find the perfect service provider for your needs</p>
         </div>
 
         {/* Subscription Banner for non-subscribed clients */}
@@ -155,15 +163,15 @@ export default function BrowseListPage() {
         <ProviderFilters />
 
         {/* Results */}
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {loading ? (
             <PageLoader message="Loading providers..." variant="skeleton" />
           ) : providers && providers.length > 0 ? (
             <>
-              <p className="mb-4 text-sm text-muted-foreground">
+              <p className="mb-4 sm:mb-6 text-sm sm:text-base text-muted-foreground font-medium">
                 {providers.length} provider{providers.length !== 1 ? "s" : ""} found
               </p>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {providers.map((provider) => (
                   <ProviderCard 
                     key={provider.id} 
@@ -174,9 +182,12 @@ export default function BrowseListPage() {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-lg font-medium">No providers found</p>
-              <p className="mt-2 text-muted-foreground">Try adjusting your filters or check back later</p>
+            <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center px-4">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center mb-4">
+                <span className="text-3xl sm:text-4xl">🔍</span>
+              </div>
+              <p className="text-lg sm:text-xl font-semibold mb-2">No providers found</p>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-md">Try adjusting your filters or check back later for new providers</p>
             </div>
           )}
         </div>
@@ -196,6 +207,16 @@ export default function BrowseListPage() {
           return success;
         }}
       />
+      
+      {/* Bottom Navigation for Mobile */}
+      {user && (
+        <BottomNav
+          userRole={userRole}
+          hasProviderProfile={hasProviderProfile}
+          hasClientProfile={hasClientProfile}
+          onSignOut={handleSignOut}
+        />
+      )}
     </div>
   )
 }

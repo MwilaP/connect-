@@ -12,7 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog"
-import { Eye, TrendingUp, Calendar, User as UserIcon, Clock, X, Menu } from "lucide-react"
+import { Eye, TrendingUp, Calendar, User as UserIcon, Clock, X } from "lucide-react"
+import { BottomNav } from "../../components/BottomNav"
 import { Badge } from "../../../components/ui/badge"
 import { getProviderAge } from "../../../lib/age-utils"
 import { formatLocation } from "../../../lib/location-data"
@@ -31,7 +32,6 @@ export default function ProviderDashboardPage() {
   const [showSevenDayModal, setShowSevenDayModal] = useState(false)
   const [sevenDayViews, setSevenDayViews] = useState<any[]>([])
   const [loadingSevenDayViews, setLoadingSevenDayViews] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -170,60 +170,35 @@ export default function ProviderDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-lg sm:text-xl font-semibold">
-            ConnectPro
+    <div className="min-h-screen bg-background pb-16 sm:pb-0">
+      {/* Simplified Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              ConnectPro
+            </h1>
           </Link>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 lg:gap-4">
-            <Button variant="ghost" size="sm" asChild>
+          {/* Desktop Navigation Only */}
+          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/browse">Browse</Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/provider/profile">My Profile</Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
-
-          {/* Mobile Menu Button */}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-background">
-            <nav className="container mx-auto px-4 py-3 flex flex-col gap-2">
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/browse">Browse</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/provider/profile">My Profile</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/referrals">Referrals</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
-                Sign Out
-              </Button>
-            </nav>
-          </div>
-        )}
       </header>
 
       <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
@@ -365,6 +340,14 @@ export default function ProviderDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Bottom Navigation for Mobile */}
+      <BottomNav
+        userRole="provider"
+        hasProviderProfile={true}
+        hasClientProfile={false}
+        onSignOut={handleSignOut}
+      />
 
       {/* 7-Day Views Modal */}
       <Dialog open={showSevenDayModal} onOpenChange={setShowSevenDayModal}>

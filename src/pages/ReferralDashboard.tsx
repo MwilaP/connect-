@@ -11,7 +11,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Menu, Lock, CreditCard, Crown } from 'lucide-react';
+import { Copy, Share2, Users, DollarSign, TrendingUp, CheckCircle, Clock, Gift, Lock, CreditCard, Crown } from 'lucide-react';
+import { BottomNav } from '../components/BottomNav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 
@@ -34,9 +35,11 @@ export default function ReferralDashboard() {
   const { toast } = useToast();
   const [copying, setCopying] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [hasProviderProfile, setHasProviderProfile] = useState(false);
+  const [hasClientProfile, setHasClientProfile] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,19 +76,33 @@ export default function ReferralDashboard() {
     setSharing(false);
   };
 
+  // Get user role and profile info
+  useState(() => {
+    if (user) {
+      const role = user.user_metadata?.role;
+      setUserRole(role);
+      // For simplicity, assume profiles exist if on referral page
+      if (role === 'provider') {
+        setHasProviderProfile(true);
+      } else if (role === 'client') {
+        setHasClientProfile(true);
+      }
+    }
+  });
+
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <header className="border-b bg-background sticky top-0 z-50">
-          <div className="container mx-auto flex h-16 items-center justify-between px-4">
-            <Link to="/" className="text-xl font-semibold">
-              ConnectPro
+      <div className="min-h-screen pb-16 sm:pb-0">
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+          <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                ConnectPro
+              </h1>
             </Link>
-            <nav className="flex items-center gap-4">
-              <Button variant="ghost" disabled>
-                Loading...
-              </Button>
-            </nav>
           </div>
         </header>
         <div className="container mx-auto py-8 px-4">
@@ -108,64 +125,37 @@ export default function ReferralDashboard() {
   const referralLink = getReferralLink();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-lg sm:text-xl font-semibold">
-            ConnectPro
+    <div className="min-h-screen bg-background pb-16 sm:pb-0">
+      {/* Simplified Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              ConnectPro
+            </h1>
           </Link>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 lg:gap-4">
-            <Button variant="ghost" size="sm" asChild>
+          {/* Desktop Navigation Only */}
+          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/browse">Browse</Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to={user?.user_metadata?.role === 'provider' ? '/provider/profile' : '/client/profile'}>
                 My Profile
               </Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
-
-          {/* Mobile Menu Button */}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-background">
-            <nav className="container mx-auto px-4 py-3 flex flex-col gap-2">
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/browse">Browse</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to={user?.user_metadata?.role === 'provider' ? '/provider/profile' : '/client/profile'}>
-                  My Profile
-                </Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild onClick={() => setMobileMenuOpen(false)}>
-                <Link to="/referrals">Referrals</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
-                Sign Out
-              </Button>
-            </nav>
-          </div>
-        )}
       </header>
 
       <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -585,6 +575,14 @@ export default function ReferralDashboard() {
             description: 'Your withdrawal will be processed within 24-48 hours',
           });
         }}
+      />
+      
+      {/* Bottom Navigation for Mobile */}
+      <BottomNav
+        userRole={userRole}
+        hasProviderProfile={hasProviderProfile}
+        hasClientProfile={hasClientProfile}
+        onSignOut={handleSignOut}
       />
     </div>
   );
