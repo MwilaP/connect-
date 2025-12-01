@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createClient } from '../../lib/supabase/client';
 import type { ReferralCode, ReferralStats, Referral, ReferralReward } from '../../lib/types/referral';
 
@@ -16,16 +16,13 @@ export function useReferral() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [access, setAccess] = useState<ReferralAccess | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Check if user has access to referral program
-  const checkAccess = async () => {
+  const checkAccess = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
-        .rpc('check_referral_access', { p_user_id: user.id });
+        .rpc('check_referral_access', { p_user_id: userId });
 
       if (error) throw error;
 
@@ -40,18 +37,15 @@ export function useReferral() {
       console.error('Error checking access:', err);
       setError(err instanceof Error ? err.message : 'Failed to check access');
     }
-  };
+  }, [supabase]);
 
   // Get user's referral code
-  const fetchReferralCode = async () => {
+  const fetchReferralCode = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
         .from('referral_codes')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -63,7 +57,7 @@ export function useReferral() {
       } else {
         // Create referral code if it doesn't exist
         const { data: newCode, error: createError } = await supabase
-          .rpc('create_referral_code_for_user', { p_user_id: user.id });
+          .rpc('create_referral_code_for_user', { p_user_id: userId });
 
         if (createError) throw createError;
 
@@ -71,7 +65,7 @@ export function useReferral() {
         const { data: createdCode } = await supabase
           .from('referral_codes')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .single();
 
         if (createdCode) {
@@ -82,16 +76,13 @@ export function useReferral() {
       console.error('Error fetching referral code:', err);
       setError('Failed to load referral code');
     }
-  };
+  }, [supabase]);
 
   // Get referral stats
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
-        .rpc('get_referral_stats', { p_user_id: user.id });
+        .rpc('get_referral_stats', { p_user_id: userId });
 
       if (error) throw error;
 
@@ -111,18 +102,15 @@ export function useReferral() {
       console.error('Error fetching stats:', err);
       setError('Failed to load referral statistics');
     }
-  };
+  }, [supabase]);
 
   // Get user's referrals
-  const fetchReferrals = async () => {
+  const fetchReferrals = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
         .from('referrals')
         .select('*')
-        .eq('referrer_id', user.id)
+        .eq('referrer_id', userId)
         .order('referred_at', { ascending: false });
 
       if (error) throw error;
@@ -132,18 +120,15 @@ export function useReferral() {
       console.error('Error fetching referrals:', err);
       setError('Failed to load referrals');
     }
-  };
+  }, [supabase]);
 
   // Get user's rewards
-  const fetchRewards = async () => {
+  const fetchRewards = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
         .from('referral_rewards')
         .select('*')
-        .eq('referrer_id', user.id)
+        .eq('referrer_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -153,7 +138,7 @@ export function useReferral() {
       console.error('Error fetching rewards:', err);
       setError('Failed to load rewards');
     }
-  };
+  }, [supabase]);
 
   // Track a referral (called during signup)
   const trackReferral = async (referralCode: string) => {
@@ -193,34 +178,32 @@ export function useReferral() {
     }
   };
 
-  // Generate referral link
-  const getReferralLink = (): string => {
+  // Generate referral link (memoized)
+  const getReferralLink = useMemo((): string => {
     if (!referralCode) return '';
     const baseUrl = window.location.origin;
     return `${baseUrl}/auth/signup?ref=${referralCode.referral_code}`;
-  };
+  }, [referralCode]);
 
   // Copy referral link to clipboard
-  const copyReferralLink = async (): Promise<boolean> => {
+  const copyReferralLink = useCallback(async (): Promise<boolean> => {
     try {
-      const link = getReferralLink();
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(getReferralLink);
       return true;
     } catch (err) {
       console.error('Error copying to clipboard:', err);
       return false;
     }
-  };
+  }, [getReferralLink]);
 
   // Share referral link (using Web Share API if available)
-  const shareReferralLink = async (): Promise<boolean> => {
+  const shareReferralLink = useCallback(async (): Promise<boolean> => {
     try {
-      const link = getReferralLink();
       if (navigator.share) {
         await navigator.share({
           title: 'Join our platform!',
           text: 'Sign up using my referral link and get started!',
-          url: link,
+          url: getReferralLink,
         });
         return true;
       } else {
@@ -231,25 +214,39 @@ export function useReferral() {
       console.error('Error sharing:', err);
       return false;
     }
-  };
+  }, [getReferralLink, copyReferralLink]);
 
-  // Refresh all data
-  const refresh = async () => {
+  // Refresh all data (optimized with parallel fetching)
+  const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-    await checkAccess();
-    await Promise.all([
-      fetchReferralCode(),
-      fetchStats(),
-      fetchReferrals(),
-      fetchRewards(),
-    ]);
-    setLoading(false);
-  };
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Run all fetches in parallel for faster loading
+      await Promise.all([
+        checkAccess(user.id),
+        fetchReferralCode(user.id),
+        fetchStats(user.id),
+        fetchReferrals(user.id),
+        fetchRewards(user.id),
+      ]);
+    } catch (err) {
+      console.error('Error refreshing data:', err);
+      setError('Failed to load referral data');
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, checkAccess, fetchReferralCode, fetchStats, fetchReferrals, fetchRewards]);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
 
   return {
     referralCode,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../contexts/SupabaseContext';
 import { useReferral } from '../hooks/use-referral';
@@ -6,7 +6,8 @@ import { useToast } from '../../hooks/use-toast';
 import { PageLoader } from '../components/PageLoader';
 import { ReferralAccessPaymentModal } from '../components/ReferralAccessPaymentModal';
 import { WithdrawalRequestModal } from '../components/WithdrawalRequestModal';
-import { WithdrawalHistory } from '../components/WithdrawalHistory';
+// Lazy load WithdrawalHistory to improve initial load time
+const WithdrawalHistory = lazy(() => import('../components/WithdrawalHistory').then(module => ({ default: module.WithdrawalHistory })));
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
@@ -76,8 +77,8 @@ export default function ReferralDashboard() {
     setSharing(false);
   };
 
-  // Get user role and profile info
-  useState(() => {
+  // Get user role and profile info (memoized)
+  useMemo(() => {
     if (user) {
       const role = user.user_metadata?.role;
       setUserRole(role);
@@ -88,7 +89,7 @@ export default function ReferralDashboard() {
         setHasClientProfile(true);
       }
     }
-  });
+  }, [user]);
 
   if (loading) {
     return (
@@ -122,7 +123,7 @@ export default function ReferralDashboard() {
     );
   }
 
-  const referralLink = getReferralLink();
+  const referralLink = getReferralLink;
 
   return (
     <div className="min-h-screen bg-background pb-16 sm:pb-0">
@@ -544,7 +545,14 @@ export default function ReferralDashboard() {
         </TabsContent>
 
         <TabsContent value="withdrawals" className="mt-6">
-          <WithdrawalHistory />
+          <Suspense fallback={
+            <div className="py-8 text-center">
+              <div className="h-8 w-8 animate-spin mx-auto border-4 border-primary border-t-transparent rounded-full" />
+              <p className="mt-2 text-sm text-muted-foreground">Loading withdrawal history...</p>
+            </div>
+          }>
+            <WithdrawalHistory />
+          </Suspense>
         </TabsContent>
       </Tabs>
       </>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createClient } from '../../lib/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
@@ -42,13 +42,9 @@ export function WithdrawalHistory() {
     totalWithdrawn: 0,
   });
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    fetchWithdrawals();
-  }, []);
-
-  const fetchWithdrawals = async () => {
+  const fetchWithdrawals = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -79,9 +75,13 @@ export function WithdrawalHistory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
-  const getStatusBadge = (status: string) => {
+  useEffect(() => {
+    fetchWithdrawals();
+  }, [fetchWithdrawals]);
+
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'completed':
         return (
@@ -114,9 +114,9 @@ export function WithdrawalHistory() {
       default:
         return <Badge>{status}</Badge>;
     }
-  };
+  }, []);
 
-  const getPaymentMethodLabel = (method: string) => {
+  const getPaymentMethodLabel = useCallback((method: string) => {
     switch (method) {
       case 'airtel_money':
         return 'Airtel Money';
@@ -127,15 +127,15 @@ export function WithdrawalHistory() {
       default:
         return method;
     }
-  };
+  }, []);
 
-  const formatPhoneNumber = (phone: string) => {
+  const formatPhoneNumber = useCallback((phone: string) => {
     // Format phone number for display (e.g., 0977123456 -> 097 712 3456)
     if (phone.length === 10) {
       return `${phone.slice(0, 3)} ${phone.slice(3, 6)} ${phone.slice(6)}`;
     }
     return phone;
-  };
+  }, []);
 
   if (loading) {
     return (
