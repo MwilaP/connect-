@@ -8,17 +8,19 @@ import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { PaymentModal } from "../../components/PaymentModal"
 import { AccessRestrictionModal } from "../../components/AccessRestrictionModal"
-import { MapPin, User, Lock, Phone, Crown, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { MapPin, User, Lock, Phone, Crown, X, ChevronLeft, ChevronRight, ArrowLeft, Calendar, Briefcase, DollarSign, Star, Image as ImageIcon } from "lucide-react"
 import { Badge } from "../../../components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
 import type { ProviderProfile } from "../../../lib/types"
 import { getProviderAge } from "../../../lib/age-utils"
 import { formatLocation } from "../../../lib/location-data"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+import { BottomNav } from "../../components/BottomNav"
 
 export default function ProviderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useSupabase()
+  const { user, signOut } = useSupabase()
   const { subscriptionStatus, trackProfileView, checkContactUnlock, unlockContact, subscribe } = useSubscription()
   const [provider, setProvider] = useState<ProviderProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -28,8 +30,13 @@ export default function ProviderDetailPage() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [showContactUnlockModal, setShowContactUnlockModal] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [hasProviderProfile, setHasProviderProfile] = useState(false)
+  const [hasClientProfile, setHasClientProfile] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -147,24 +154,45 @@ export default function ProviderDetailPage() {
   }
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await signOut()
     navigate("/auth/login")
   }
 
+  // Get user role and profile info
+  useEffect(() => {
+    if (user) {
+      const role = user.user_metadata?.role
+      setUserRole(role)
+      if (role === 'provider') {
+        setHasProviderProfile(true)
+      } else if (role === 'client') {
+        setHasClientProfile(true)
+      }
+    }
+  }, [user])
+
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <header className="border-b bg-background sticky top-0 z-50">
-          <div className="container mx-auto flex h-16 items-center justify-between px-4">
-            <Link to="/" className="text-xl font-semibold">
-              ConnectPro
+      <div className="min-h-screen pb-16 sm:pb-0">
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+          <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                ConnectPro
+              </h1>
             </Link>
-            <nav className="flex items-center gap-4">
-              <Button variant="ghost" asChild>
-                <Link to="/browse">Back to Browse</Link>
-              </Button>
-            </nav>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="hidden sm:inline-flex" 
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Browse
+            </Button>
           </div>
         </header>
         <div className="container mx-auto py-8 px-4">
@@ -180,8 +208,8 @@ export default function ProviderDetailPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold">Error</h2>
           <p className="mt-2 text-muted-foreground">{error || "Provider not found"}</p>
-          <Button asChild className="mt-4">
-            <Link to="/browse">Back to Browse</Link>
+          <Button onClick={() => navigate(-1)} className="mt-4">
+            Back to Browse
           </Button>
         </div>
       </div>
@@ -189,108 +217,220 @@ export default function ProviderDetailPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-xl font-semibold">
-            ConnectPro
+    <div className="min-h-screen bg-background pb-16 sm:pb-0">
+      {/* Professional Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              ConnectPro
+            </h1>
           </Link>
-          <Button variant="ghost" asChild>
-            <Link to="/browse">Back to Browse</Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="hidden sm:inline-flex touch-target" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Browse
           </Button>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-6xl px-4 py-8">
-        {/* Hero Section with Profile Image */}
-        <div className="mb-8">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border">
-            <div className="grid md:grid-cols-2 gap-6 p-8">
-              {/* Profile Info */}
-              <div className="flex flex-col justify-center space-y-4">
-                <div>
-                  <h1 className="text-4xl font-bold mb-2">{provider.name}</h1>
-                  <div className="flex flex-wrap gap-4 text-muted-foreground">
-                    {getProviderAge(provider) && (
-                      <div className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        <span className="text-lg">{getProviderAge(provider)} years old</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
-                      <span className="text-lg">
-                        {provider.country && provider.city
-                          ? formatLocation(provider.country, provider.city, provider.area || undefined)
-                          : provider.location || "Location not specified"}
-                      </span>
-                    </div>
+      <div className="container mx-auto max-w-md px-0 sm:px-4 py-0 sm:py-6">
+        {/* Tinder-Style Card */}
+        <div className="relative h-[calc(100vh-7rem)] sm:h-[600px] sm:rounded-2xl overflow-hidden shadow-2xl">
+          {/* Image Carousel */}
+          <div className="relative h-full w-full">
+            {provider.images && provider.images.length > 0 ? (
+              <>
+                <img
+                  src={provider.images[currentImageIndex] || "/placeholder.svg"}
+                  alt={provider.name}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+                    user && !subscriptionStatus.hasActiveSubscription ? 'blur-md' : ''
+                  }`}
+                />
+                {user && !subscriptionStatus.hasActiveSubscription && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-10">
+                    <Lock className="h-16 w-16 mb-4" />
+                    <p className="text-lg font-semibold mb-2">Subscribe to Unlock</p>
+                    <Button 
+                      onClick={() => setShowSubscriptionModal(true)}
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                    >
+                      <Crown className="h-4 w-4 mr-2" />
+                      Get Premium
+                    </Button>
                   </div>
-                </div>
-                
-                {/* Bio Preview */}
-                {provider.bio && (
-                  <p className="text-muted-foreground leading-relaxed line-clamp-3">
-                    {provider.bio}
-                  </p>
                 )}
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background flex items-center justify-center">
+                <Avatar className="h-48 w-48">
+                  <AvatarFallback className="text-6xl bg-primary/10">
+                    {provider.name?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-              
-              {/* Featured Image */}
-              {provider.images && provider.images.length > 0 && (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl border-2 border-background shadow-lg">
-                  <img
-                    src={provider.images[0] || "/placeholder.svg"}
-                    alt={provider.name}
-                    className={`h-full w-full object-cover transition-all cursor-pointer hover:scale-105 ${
-                      user && !subscriptionStatus.hasActiveSubscription ? 'blur-sm' : ''
+            )}
+
+            {/* Image Navigation Dots */}
+            {provider.images && provider.images.length > 1 && (
+              <div className="absolute top-4 left-0 right-0 flex gap-1 px-4 z-20">
+                {provider.images.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`h-1 flex-1 rounded-full transition-all ${
+                      index === currentImageIndex
+                        ? 'bg-white'
+                        : 'bg-white/40'
                     }`}
-                    onClick={() => user && subscriptionStatus.hasActiveSubscription && setSelectedImageIndex(0)}
                   />
-                  {user && !subscriptionStatus.hasActiveSubscription && (
-                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-4">
-                      <Lock className="h-10 w-10 mb-2" />
-                      <p className="text-sm font-medium text-center">Subscribe to unlock</p>
+                ))}
+              </div>
+            )}
+
+            {/* Tap Areas for Image Navigation */}
+            {provider.images && provider.images.length > 1 && (
+              <>
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+                  onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : provider.images!.length - 1)}
+                />
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+                  onClick={() => setCurrentImageIndex(prev => prev < provider.images!.length - 1 ? prev + 1 : 0)}
+                />
+              </>
+            )}
+
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+            {/* Profile Info Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-20">
+              <div className="flex items-end justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h1 className="text-3xl font-bold">{provider.name}</h1>
+                    {getProviderAge(provider) && (
+                      <span className="text-2xl font-semibold">{getProviderAge(provider)}</span>
+                    )}
+                  </div>
+                  {provider.country && provider.city && (
+                    <div className="flex items-center gap-2 text-white/90 mb-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>{formatLocation(provider.country, provider.city, provider.area || undefined)}</span>
                     </div>
                   )}
-                  {user && subscriptionStatus.hasActiveSubscription && (
-                    <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                      Click to view full size
-                    </div>
+                  {provider.bio && (
+                    <p className="text-sm text-white/80 line-clamp-2">{provider.bio}</p>
                   )}
                 </div>
-              )}
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/40"
+                  onClick={() => setShowInfo(!showInfo)}
+                >
+                  <User className="h-5 w-5 text-white" />
+                </Button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-14 w-14 rounded-full bg-white hover:bg-white/90 shadow-lg"
+                  onClick={() => navigate(-1)}
+                >
+                  <X className="h-6 w-6 text-red-500" />
+                </Button>
+                {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
+                  <Button
+                    size="icon"
+                    className="h-16 w-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 shadow-lg"
+                    onClick={() => {
+                      if (provider.contact_number) {
+                        window.location.href = `tel:${provider.contact_number}`
+                      }
+                    }}
+                  >
+                    <Phone className="h-7 w-7 text-white" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    className="h-16 w-16 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                    onClick={() => setShowContactUnlockModal(true)}
+                  >
+                    <Lock className="h-6 w-6 text-white" />
+                  </Button>
+                )}
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-14 w-14 rounded-full bg-white hover:bg-white/90 shadow-lg"
+                  onClick={() => setShowInfo(!showInfo)}
+                >
+                  <User className="h-6 w-6 text-primary" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* Info Sheet - Slides up from bottom */}
+        {showInfo && (
+          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowInfo(false)}>
+            <div 
+              className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold">About {provider.name}</h2>
+                <Button size="icon" variant="ghost" onClick={() => setShowInfo(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="p-6 space-y-6">
 
             {/* Services */}
             {provider.services && provider.services.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl">Services Offered</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Services Offered
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {provider.services.map((service) => (
-                    <div key={service.id} className="rounded-lg border bg-card hover:bg-accent/50 transition-colors p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-lg">{service.service_name}</h4>
-                          {service.description && (
-                            <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
-                          )}
-                        </div>
-                        <Badge variant="secondary" className="text-base font-semibold px-3 py-1">
-                          K{service.price}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                <CardContent>
+                  <div className="grid gap-3 sm:gap-4">
+                    {provider.services.map((service) => (
+                      <Card key={service.id} className="border-2 hover:border-primary/50 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-base sm:text-lg">{service.service_name}</h4>
+                              {service.description && (
+                                <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
+                              )}
+                            </div>
+                            <Badge variant="secondary" className="text-base font-semibold px-3 py-1.5 flex items-center gap-1 flex-shrink-0">
+                              <DollarSign className="h-3 w-3" />
+                              K{service.price}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -299,45 +439,51 @@ export default function ProviderDetailPage() {
             {provider.bio && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl">About</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    About {provider.name}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{provider.bio}</p>
+                  <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">{provider.bio}</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Photo Gallery */}
-            {provider.images && provider.images.length > 1 && (
+            {provider.images && provider.images.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl">Photo Gallery</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5" />
+                    Photo Gallery ({provider.images.length})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {provider.images.slice(1).map((image: string, index: number) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                    {provider.images.map((image: string, index: number) => (
                       <div 
-                        key={index + 1} 
-                        className="aspect-square overflow-hidden rounded-lg border relative group cursor-pointer"
-                        onClick={() => user && subscriptionStatus.hasActiveSubscription && setSelectedImageIndex(index + 1)}
+                        key={index} 
+                        className="aspect-square overflow-hidden rounded-lg border-2 hover:border-primary/50 relative group cursor-pointer transition-all"
+                        onClick={() => user && subscriptionStatus.hasActiveSubscription && setSelectedImageIndex(index)}
                       >
                         <img
                           src={image || "/placeholder.svg"}
-                          alt={`${provider.name} photo ${index + 2}`}
-                          className={`h-full w-full object-cover transition-all group-hover:scale-110 ${
+                          alt={`${provider.name} photo ${index + 1}`}
+                          className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-110 ${
                             user && !subscriptionStatus.hasActiveSubscription ? 'blur-md' : ''
                           }`}
                         />
                         {user && !subscriptionStatus.hasActiveSubscription && (
-                          <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white">
-                            <Lock className="h-6 w-6 mb-1" />
-                            <p className="text-xs font-medium">Subscribe</p>
+                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
+                            <Lock className="h-6 w-6 sm:h-8 sm:w-8 mb-1" />
+                            <p className="text-xs sm:text-sm font-medium">Subscribe</p>
                           </div>
                         )}
                         {user && subscriptionStatus.hasActiveSubscription && (
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 text-xs px-2 py-1 rounded">
-                              View full size
+                              Click to view
                             </div>
                           </div>
                         )}
@@ -347,74 +493,121 @@ export default function ProviderDetailPage() {
                 </CardContent>
               </Card>
             )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Contact Section */}
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle className="text-xl">Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg">
-                      <Phone className="h-6 w-6 text-primary" />
-                      <span className="font-semibold text-lg">{provider.contact_number || '+260 XXX XXX XXX'}</span>
+                {/* Contact Section in Sheet */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Contact Information
+                  </h3>
+                  {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                        <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                          <Phone className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground mb-0.5">Phone Number</p>
+                          <p className="font-semibold text-lg truncate">{provider.contact_number || '+260 XXX XXX XXX'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
+                        <div className="h-5 w-5 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs">✓</span>
+                        </div>
+                        <span className="font-medium">Contact unlocked</span>
+                      </div>
                     </div>
-                    <p className="text-sm text-green-600 flex items-center gap-2">
-                      <span className="text-lg">✓</span> Contact information unlocked
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Unlock this provider's contact number to get in touch directly
-                    </p>
-                    <Button 
-                      onClick={() => setShowContactUnlockModal(true)}
-                      className="w-full"
-                      size="lg"
-                    >
-                      <Lock className="h-4 w-4 mr-2" />
-                      Unlock Contact (K30)
-                    </Button>
-                    <p className="text-xs text-center text-muted-foreground">
-                      One-time payment for this provider only
-                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-muted/50 rounded-lg border border-dashed">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                            <Lock className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Contact Locked</p>
+                            <p className="text-xs text-muted-foreground">K30 one-time unlock</p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Unlock to get direct contact access to this provider
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => {
+                          setShowInfo(false)
+                          setShowContactUnlockModal(true)
+                        }}
+                        className="w-full"
+                        size="lg"
+                      >
+                        <Lock className="h-4 w-4 mr-2" />
+                        Unlock Contact - K30
+                      </Button>
+                      <p className="text-xs text-center text-muted-foreground">
+                        One-time payment • Valid forever
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Subscription CTA in Sheet */}
+                {user && !subscriptionStatus.hasActiveSubscription && (
+                  <div className="p-6 border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+                        <Crown className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-lg mb-1">Premium Access</h4>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Subscribe for K100/month to unlock all photos and get unlimited profile views
+                        </p>
+                        <ul className="space-y-2 mb-4 text-sm">
+                          <li className="flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
+                            <span>View all photos unblurred</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
+                            <span>Unlimited profile access</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
+                            <span>Priority support</span>
+                          </li>
+                        </ul>
+                        <Button 
+                          onClick={() => {
+                            setShowInfo(false)
+                            setShowSubscriptionModal(true)
+                          }}
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md"
+                          size="lg"
+                        >
+                          <Crown className="h-4 w-4 mr-2" />
+                          Subscribe Now - K100/mo
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Subscription CTA if not subscribed */}
-            {user && !subscriptionStatus.hasActiveSubscription && (
-              <Card className="border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <Crown className="h-6 w-6 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg mb-2">Unlock Full Access</h4>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Subscribe for K100/month to view all photos unblurred and get unlimited profile access
-                      </p>
-                      <Button 
-                        onClick={() => setShowSubscriptionModal(true)}
-                        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-                      >
-                        <Crown className="h-4 w-4 mr-2" />
-                        Subscribe Now
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
       </div>
+
+      {/* Bottom Navigation for Mobile */}
+      {user && (
+        <BottomNav
+          userRole={userRole}
+          hasProviderProfile={hasProviderProfile}
+          hasClientProfile={hasClientProfile}
+          onSignOut={handleSignOut}
+        />
+      )}
 
       {/* Access Restriction Modal */}
       <AccessRestrictionModal

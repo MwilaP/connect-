@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { useSearchParams, Link, useNavigate } from "react-router-dom"
+import { useEffect, useState, useRef } from "react"
+import { useSearchParams, Link, useNavigate, useLocation } from "react-router-dom"
 import { createClient } from "../../../lib/supabase/client"
 import { useSupabase } from "../../contexts/SupabaseContext"
 import { useSubscription } from "../../hooks/useSubscription"
@@ -13,17 +13,41 @@ import { BottomNav } from "../../components/BottomNav"
 import type { ProviderProfile } from "../../../lib/types"
 import type { User } from "@supabase/supabase-js"
 
+// Cache for providers to prevent refetching when navigating back
+let cachedProviders: ProviderProfile[] | null = null
+let cachedSearchParams: string | null = null
+let cachedScrollPosition: number = 0
+
 export default function BrowseListPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, signOut } = useSupabase()
   const { subscriptionStatus, subscribe } = useSubscription()
-  const [providers, setProviders] = useState<ProviderProfile[]>([])
+  const [providers, setProviders] = useState<ProviderProfile[]>(cachedProviders || [])
   const [userRole, setUserRole] = useState<string | null>(null)
   const [hasProviderProfile, setHasProviderProfile] = useState(false)
   const [hasClientProfile, setHasClientProfile] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!cachedProviders)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const isInitialMount = useRef(true)
+
+  // Restore scroll position when returning from detail page
+  useEffect(() => {
+    if (cachedProviders && cachedScrollPosition > 0) {
+      // Use setTimeout to ensure DOM is fully rendered
+      setTimeout(() => {
+        window.scrollTo(0, cachedScrollPosition)
+      }, 0)
+    }
+  }, [])
+
+  // Save scroll position before unmounting
+  useEffect(() => {
+    return () => {
+      cachedScrollPosition = window.scrollY
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchData() {
@@ -47,6 +71,15 @@ export default function BrowseListPage() {
 
         setHasProviderProfile(!!providerProfile)
         setHasClientProfile(!!clientProfile)
+      }
+
+      // Check if we're returning from a detail page with cached data
+      const currentSearchParams = searchParams.toString()
+      if (cachedProviders && cachedSearchParams === currentSearchParams && isInitialMount.current) {
+        setProviders(cachedProviders)
+        setLoading(false)
+        isInitialMount.current = false
+        return
       }
 
       // Build query with filters
@@ -80,9 +113,13 @@ export default function BrowseListPage() {
         console.error("Error fetching providers:", error)
       } else {
         setProviders(data || [])
+        // Cache the results
+        cachedProviders = data || []
+        cachedSearchParams = currentSearchParams
       }
       
       setLoading(false)
+      isInitialMount.current = false
     }
 
     fetchData()
