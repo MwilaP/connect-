@@ -91,20 +91,20 @@ export default function BrowseListPage() {
         `)
         .order("created_at", { ascending: false })
 
-      const location = searchParams.get("location")
-      const minAge = searchParams.get("minAge")
-      const maxAge = searchParams.get("maxAge")
+      const country = searchParams.get("country")
+      const city = searchParams.get("city")
+      const area = searchParams.get("area")
 
-      if (location) {
-        query = query.ilike("location", `%${location}%`)
+      if (country) {
+        query = query.eq("country", country)
       }
 
-      if (minAge) {
-        query = query.gte("age", Number.parseInt(minAge))
+      if (city) {
+        query = query.eq("city", city)
       }
 
-      if (maxAge) {
-        query = query.lte("age", Number.parseInt(maxAge))
+      if (area) {
+        query = query.eq("area", area)
       }
 
       const { data, error } = await query

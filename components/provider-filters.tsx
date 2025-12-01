@@ -1,73 +1,144 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Button } from "./ui/button"
-import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-import { Card, CardContent } from "./ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
+import { Filter } from "lucide-react"
+import { locationData, getCitiesByCountry, getAreasByCity } from "../lib/location-data"
 
 export function ProviderFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const [open, setOpen] = useState(false)
 
-  const [location, setLocation] = useState(searchParams.get("location") || "")
-  const [minRate, setMinRate] = useState(searchParams.get("minRate") || "")
-  const [maxRate, setMaxRate] = useState(searchParams.get("maxRate") || "")
-  const [minAge, setMinAge] = useState(searchParams.get("minAge") || "")
-  const [maxAge, setMaxAge] = useState(searchParams.get("maxAge") || "")
+  const [country, setCountry] = useState(searchParams.get("country") || "")
+  const [city, setCity] = useState(searchParams.get("city") || "")
+  const [area, setArea] = useState(searchParams.get("area") || "")
+
+  // Reset dependent fields when parent changes
+  useEffect(() => {
+    if (!country) {
+      setCity("")
+      setArea("")
+    }
+  }, [country])
+
+  useEffect(() => {
+    if (!city) {
+      setArea("")
+    }
+  }, [city])
 
   const handleFilter = () => {
     const params = new URLSearchParams()
 
-    if (location) params.set("location", location)
-    if (minRate) params.set("minRate", minRate)
-    if (maxRate) params.set("maxRate", maxRate)
-    if (minAge) params.set("minAge", minAge)
-    if (maxAge) params.set("maxAge", maxAge)
+    if (country) params.set("country", country)
+    if (city) params.set("city", city)
+    if (area) params.set("area", area)
 
     navigate(`/browse?${params.toString()}`)
+    setOpen(false)
   }
 
   const handleClear = () => {
-    setLocation("")
-    setMinRate("")
-    setMaxRate("")
-    setMinAge("")
-    setMaxAge("")
+    setCountry("")
+    setCity("")
+    setArea("")
     navigate("/browse")
+    setOpen(false)
   }
 
+  const availableCities = country ? getCitiesByCountry(country) : []
+  const availableAreas = country && city ? getAreasByCity(country, city) : []
+
+  const activeFiltersCount = [country, city, area].filter(Boolean).length
+
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Filter className="h-4 w-4" />
+          Filters
+          {activeFiltersCount > 0 && (
+            <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+              {activeFiltersCount}
+            </span>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Filter Providers</DialogTitle>
+          <DialogDescription>
+            Select country, then city, then area to narrow your search
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              placeholder="e.g., New York"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
+            <Label htmlFor="country">Country</Label>
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger id="country">
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                {locationData.countries.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.flag} {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Hourly Rate Range</Label>
-            <div className="flex gap-2">
-              <Input type="number" placeholder="Min" value={minRate} onChange={(e) => setMinRate(e.target.value)} />
-              <Input type="number" placeholder="Max" value={maxRate} onChange={(e) => setMaxRate(e.target.value)} />
-            </div>
+            <Label htmlFor="city">City</Label>
+            <Select value={city} onValueChange={setCity} disabled={!country}>
+              <SelectTrigger id="city">
+                <SelectValue placeholder={country ? "Select city" : "Select country first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCities.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Age Range</Label>
-            <div className="flex gap-2">
-              <Input type="number" placeholder="Min" value={minAge} onChange={(e) => setMinAge(e.target.value)} />
-              <Input type="number" placeholder="Max" value={maxAge} onChange={(e) => setMaxAge(e.target.value)} />
-            </div>
+            <Label htmlFor="area">Area</Label>
+            <Select value={area} onValueChange={setArea} disabled={!city}>
+              <SelectTrigger id="area">
+                <SelectValue placeholder={city ? "Select area" : "Select city first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAreas.map((a) => (
+                  <SelectItem key={a} value={a}>
+                    {a}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="flex gap-2">
           <Button onClick={handleFilter} className="flex-1">
             Apply Filters
           </Button>
@@ -75,7 +146,7 @@ export function ProviderFilters() {
             Clear
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   )
 }
