@@ -4,6 +4,7 @@ import { createClient } from "../../../lib/supabase/client"
 import { ClientProfileForm } from "../../../components/client-profile-form"
 import { useSupabase } from "../../contexts/SupabaseContext"
 import type { User } from "@supabase/supabase-js"
+import { Users } from "lucide-react"
 
 export default function NewClientProfilePage() {
   const navigate = useNavigate()
@@ -40,24 +41,47 @@ export default function NewClientProfilePage() {
   }, [navigate, user])
 
   if (profileLoading || !user) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background">
       {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-50">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <h1 className="text-xl font-semibold">ConnectPro</h1>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-lg font-bold text-primary-foreground">C</span>
+            </div>
+            <span className="text-lg font-semibold">ConnectPro</span>
+          </div>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Create Your Profile</h1>
-          <p className="mt-2 text-muted-foreground">Tell us about yourself to get started</p>
+      {/* Hero Section */}
+      <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+              <Users className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">Create Your Client Profile</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Set up your profile to start browsing and connecting with service providers
+            </p>
+          </div>
         </div>
+      </div>
 
+      {/* Form Section */}
+      <div className="container mx-auto max-w-3xl px-4 py-8">
         <ClientProfileForm />
       </div>
     </div>

@@ -81,9 +81,6 @@ export default function ProviderProfilePage() {
               <Link to="/provider/dashboard">Dashboard</Link>
             </Button>
             <Button variant="ghost" size="sm" className="touch-target" asChild>
-              <Link to="/browse">Browse</Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
             <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>

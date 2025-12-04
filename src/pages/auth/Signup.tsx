@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group"
 import { Alert, AlertDescription } from "../../../components/ui/alert"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { Gift } from "lucide-react"
+import { Gift, Users, Briefcase, Mail, Lock, CheckCircle2, Eye, EyeOff } from "lucide-react"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
@@ -20,6 +20,8 @@ export default function SignupPage() {
   const [searchParams] = useSearchParams()
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const [referralValid, setReferralValid] = useState<boolean | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
 
   // Check for referral code in URL
@@ -119,125 +121,252 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background">
-      <div className="w-full max-w-md">
-        {/* Logo/Brand */}
-        <div className="flex items-center justify-center gap-2 mb-6 sm:mb-8">
-          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-            <span className="text-xl sm:text-2xl font-bold text-primary-foreground">C</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            ConnectPro
-          </h1>
+    <div className="flex min-h-screen w-full bg-background">
+      {/* Left Side - Hero Section (Hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
         </div>
         
-        <Card className="border-border/50 shadow-xl">
-          <CardHeader className="space-y-2 sm:space-y-3 pb-6">
-            <CardTitle className="text-2xl sm:text-3xl font-bold text-center">Create Account</CardTitle>
-            <CardDescription className="text-center text-sm sm:text-base">
-              Join our marketplace as a client or provider
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-4 sm:px-6">
-            <form onSubmit={handleSignup}>
-              <div className="flex flex-col gap-5 sm:gap-6">
-                {referralCode && referralValid && (
-                  <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-                    <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
-                    <AlertDescription className="text-green-800 dark:text-green-200 text-sm sm:text-base">
-                      You're signing up with referral code <strong>{referralCode}</strong>. 
-                      Your referrer will earn rewards when you subscribe!
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {referralCode && referralValid === false && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="text-sm sm:text-base">
-                      Invalid referral code. You can still sign up without it.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <div className="grid gap-3">
-                  <Label className="text-sm sm:text-base font-medium">I want to</Label>
-                  <RadioGroup value={role} onValueChange={(value) => setRole(value as "client" | "provider")}>
-                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                      <RadioGroupItem value="client" id="client" className="touch-target" />
-                      <Label htmlFor="client" className="font-normal text-sm sm:text-base cursor-pointer flex-1">
-                        Browse and hire providers
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                      <RadioGroupItem value="provider" id="provider" className="touch-target" />
-                      <Label htmlFor="provider" className="font-normal text-sm sm:text-base cursor-pointer flex-1">
-                        Offer my services as a provider
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                <div className="grid gap-2.5">
-                  <Label htmlFor="email" className="text-sm sm:text-base font-medium">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 sm:h-12 text-base"
-                  />
-                </div>
-                <div className="grid gap-2.5">
-                  <Label htmlFor="password" className="text-sm sm:text-base font-medium">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="At least 6 characters"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 sm:h-12 text-base"
-                  />
-                </div>
-                <div className="grid gap-2.5">
-                  <Label htmlFor="confirm-password" className="text-sm sm:text-base font-medium">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="Re-enter your password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="h-11 sm:h-12 text-base"
-                  />
-                </div>
-                {error && (
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                    <p className="text-sm text-destructive font-medium">{error}</p>
-                  </div>
-                )}
-                <Button 
-                  type="submit" 
-                  className="w-full touch-target h-11 sm:h-12 text-base font-semibold" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating account..." : "Sign Up"}
-                </Button>
-              </div>
-              <div className="mt-6 text-center text-sm sm:text-base">
-                <span className="text-muted-foreground">Already have an account?</span>{" "}
-                <Link to="/auth/login" className="font-semibold text-primary hover:underline underline-offset-4">
-                  Login
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">C</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white">
+              ConnectPro
+            </h1>
+          </div>
+          
+          <div className="space-y-6 text-white">
+            <h2 className="text-4xl font-bold leading-tight">
+              Join the Future of<br />Professional Services
+            </h2>
+            <p className="text-xl text-white/90 max-w-md">
+              Connect with top professionals or showcase your expertise to thousands of clients.
+            </p>
+          </div>
+        </div>
         
-        {/* Back to home link */}
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to home
-          </Link>
+        {/* Features */}
+        <div className="relative z-10 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">Verified Professionals</h3>
+              <p className="text-sm text-white/80">All providers are thoroughly vetted and verified</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">Secure Payments</h3>
+              <p className="text-sm text-white/80">Safe and encrypted payment processing</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="mt-1 h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">24/7 Support</h3>
+              <p className="text-sm text-white/80">Our team is always here to help you succeed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Signup Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="flex lg:hidden items-center justify-center gap-2 mb-8">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              ConnectPro
+            </h1>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-2">Create your account</h2>
+            <p className="text-muted-foreground">
+              Get started with ConnectPro today
+            </p>
+          </div>
+
+          <form onSubmit={handleSignup} className="space-y-6">
+            {/* Referral Alerts */}
+            {referralCode && referralValid && (
+              <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                <Gift className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <AlertDescription className="text-green-800 dark:text-green-200 text-sm">
+                  You're signing up with referral code <strong>{referralCode}</strong>. 
+                  Your referrer will earn rewards when you subscribe!
+                </AlertDescription>
+              </Alert>
+            )}
+            {referralCode && referralValid === false && (
+              <Alert variant="destructive">
+                <AlertDescription className="text-sm">
+                  Invalid referral code. You can still sign up without it.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Role Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Choose your account type</Label>
+              <RadioGroup value={role} onValueChange={(value) => setRole(value as "client" | "provider")}>
+                <div 
+                  className={`relative flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                    role === "client" 
+                      ? "border-primary bg-primary/5 shadow-sm" 
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                  onClick={() => setRole("client")}
+                >
+                  <RadioGroupItem value="client" id="client" className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="h-5 w-5 text-primary" />
+                      <Label htmlFor="client" className="font-semibold text-base cursor-pointer">
+                        I'm a Client
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Looking to hire professionals for your needs
+                    </p>
+                  </div>
+                </div>
+                <div 
+                  className={`relative flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                    role === "provider" 
+                      ? "border-primary bg-primary/5 shadow-sm" 
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                  onClick={() => setRole("provider")}
+                >
+                  <RadioGroupItem value="provider" id="provider" className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Briefcase className="h-5 w-5 text-primary" />
+                      <Label htmlFor="provider" className="font-semibold text-base cursor-pointer">
+                        I'm a Provider
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Ready to offer my professional services
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 pl-10 text-base"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="At least 6 characters"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 pl-10 pr-10 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password" className="text-sm font-medium">Confirm password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="h-12 pl-10 pr-10 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription className="text-sm font-medium">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-semibold" 
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating your account..." : "Create account"}
+            </Button>
+
+            {/* Login Link */}
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">Already have an account?</span>{" "}
+              <Link to="/auth/login" className="font-semibold text-primary hover:underline underline-offset-4">
+                Sign in
+              </Link>
+            </div>
+          </form>
+
+          {/* Back to Home */}
+          <div className="mt-8 text-center">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
+              <span>←</span> Back to home
+            </Link>
+          </div>
         </div>
       </div>
     </div>

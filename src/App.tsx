@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSupabase } from './contexts/SupabaseContext'
-import { useSubscription } from './hooks/useSubscription'
 import { LoadingScreen } from './components/LoadingScreen'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 // Auth Pages
 import Login from './pages/auth/Login'
@@ -43,11 +43,10 @@ import ReferralRewardsAdmin from './pages/admin/ReferralRewardsAdmin'
 
 function App() {
   const { user, loading: userLoading } = useSupabase()
-  const { loading: subscriptionLoading } = useSubscription()
 
-  // Wait for both user and subscription data to load
-  if (userLoading || (user && subscriptionLoading)) {
-    return <LoadingScreen user={user} message="Initializing application..." />
+  // Only wait for user authentication, subscription can load in background
+  if (userLoading) {
+    return <LoadingScreen user={user} message="Loading..." />
   }
 
   return (
@@ -61,27 +60,27 @@ function App() {
       {/* Main Routes */}
       <Route path="/" element={<Home user={user} />} />
       
-      {/* Browse Routes */}
-      <Route path="/browse" element={<BrowseList />} />
-      <Route path="/browse/:id" element={<ProviderDetail />} />
+      {/* Browse Routes - Protected (Clients Only) */}
+      <Route path="/browse" element={<ProtectedRoute allowedRoles={['client']} redirectTo="/provider/dashboard"><BrowseList /></ProtectedRoute>} />
+      <Route path="/browse/:id" element={<ProtectedRoute allowedRoles={['client']} redirectTo="/provider/dashboard"><ProviderDetail /></ProtectedRoute>} />
       
-      {/* Client Routes */}
-      <Route path="/client/profile" element={<ClientProfile />} />
-      <Route path="/client/profile/new" element={<NewClientProfile />} />
-      <Route path="/client/profile/edit" element={<EditClientProfile />} />
-      <Route path="/client/subscription" element={<ClientSubscription />} />
+      {/* Client Routes - Protected */}
+      <Route path="/client/profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} />
+      <Route path="/client/profile/new" element={<ProtectedRoute><NewClientProfile /></ProtectedRoute>} />
+      <Route path="/client/profile/edit" element={<ProtectedRoute><EditClientProfile /></ProtectedRoute>} />
+      <Route path="/client/subscription" element={<ProtectedRoute><ClientSubscription /></ProtectedRoute>} />
       
-      {/* Provider Routes */}
-      <Route path="/provider/dashboard" element={<ProviderDashboard />} />
-      <Route path="/provider/profile" element={<ProviderProfile />} />
-      <Route path="/provider/profile/new" element={<NewProviderProfile />} />
-      <Route path="/provider/profile/edit" element={<EditProviderProfile />} />
+      {/* Provider Routes - Protected */}
+      <Route path="/provider/dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
+      <Route path="/provider/profile" element={<ProtectedRoute><ProviderProfile /></ProtectedRoute>} />
+      <Route path="/provider/profile/new" element={<ProtectedRoute><NewProviderProfile /></ProtectedRoute>} />
+      <Route path="/provider/profile/edit" element={<ProtectedRoute><EditProviderProfile /></ProtectedRoute>} />
       
-      {/* Referral Routes */}
-      <Route path="/referrals" element={<ReferralDashboard />} />
+      {/* Referral Routes - Protected */}
+      <Route path="/referrals" element={<ProtectedRoute><ReferralDashboard /></ProtectedRoute>} />
       
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
+      {/* Admin Routes - Protected */}
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<UsersManagement />} />
         <Route path="providers" element={<ProvidersManagement />} />

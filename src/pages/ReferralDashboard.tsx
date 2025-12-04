@@ -163,7 +163,7 @@ export default function ReferralDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Referral Program</h1>
         <p className="text-muted-foreground">
-          Earn 20,000 for every friend who subscribes using your referral link!
+          Earn K20 for every friend who subscribes using your referral link!
         </p>
       </div>
 
@@ -194,7 +194,7 @@ export default function ReferralDashboard() {
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Earn K20,000 for each successful referral</span>
+                      <span>Earn K20 for each successful referral</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -217,7 +217,7 @@ export default function ReferralDashboard() {
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Earn K20,000 for each friend who subscribes</span>
+                      <span>Earn K20 for each friend who subscribes</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -395,7 +395,7 @@ export default function ReferralDashboard() {
             <TrendingUp className="h-4 w-4" />
             <AlertDescription>
               <strong>How it works:</strong> Share your link with friends. When they sign up and
-              subscribe to any plan, you'll automatically earn 20,000!
+              subscribe to any plan, you'll automatically earn K20!
             </AlertDescription>
           </Alert>
         </CardContent>

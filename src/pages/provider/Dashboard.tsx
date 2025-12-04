@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog"
-import { Eye, TrendingUp, Calendar, User as UserIcon, Clock, X } from "lucide-react"
+import { Eye, TrendingUp, Calendar, Clock, X } from "lucide-react"
 import { BottomNav } from "../../components/BottomNav"
 import { Badge } from "../../../components/ui/badge"
 import { getProviderAge } from "../../../lib/age-utils"
@@ -186,9 +186,6 @@ export default function ProviderDashboardPage() {
           {/* Desktop Navigation Only */}
           <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
             <Button variant="ghost" size="sm" className="touch-target" asChild>
-              <Link to="/browse">Browse</Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
               <Link to="/provider/profile">My Profile</Link>
             </Button>
             <Button variant="ghost" size="sm" className="touch-target" asChild>
@@ -259,7 +256,7 @@ export default function ProviderDashboardPage() {
                   <div key={view.id} className="flex items-start sm:items-center justify-between border-b pb-3 last:border-0 gap-3">
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                       <div className="flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                        <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                        <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-sm sm:text-base truncate">
@@ -369,7 +366,7 @@ export default function ProviderDashboardPage() {
                 <div key={view.id} className="flex items-start sm:items-center justify-between border-b pb-3 last:border-0 gap-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                      <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm sm:text-base truncate">

@@ -1,9 +1,21 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { createClient } from '../../lib/supabase/client';
 import { useSupabase } from './SupabaseContext';
 import type { Subscription, SubscriptionStatus } from '../../lib/types/subscription';
 
 const DAILY_FREE_VIEWS_LIMIT = 3;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// In-memory cache for subscription data
+let subscriptionCache: {
+  data: SubscriptionStatus | null;
+  timestamp: number;
+  userId: string | null;
+} = {
+  data: null,
+  timestamp: 0,
+  userId: null,
+};
 
 type SubscriptionContextType = {
   subscriptionStatus: SubscriptionStatus;
@@ -20,140 +32,178 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user, loading: userLoading } = useSupabase();
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
-    hasActiveSubscription: false,
-    dailyViewsCount: 0,
-    dailyViewsLimit: DAILY_FREE_VIEWS_LIMIT,
-    canViewMore: true,
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>(() => {
+    // Initialize with cached data if available and valid
+    if (subscriptionCache.data && subscriptionCache.userId === user?.id) {
+      const cacheAge = Date.now() - subscriptionCache.timestamp;
+      if (cacheAge < CACHE_DURATION) {
+        return subscriptionCache.data;
+      }
+    }
+    return {
+      hasActiveSubscription: false,
+      dailyViewsCount: 0,
+      dailyViewsLimit: DAILY_FREE_VIEWS_LIMIT,
+      canViewMore: true,
+    };
   });
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
-  const fetchSubscriptionStatus = async () => {
+  const fetchSubscriptionStatus = useCallback(async (forceRefresh = false) => {
     if (!user) {
-      setSubscriptionStatus({
+      const guestStatus = {
         hasActiveSubscription: false,
         dailyViewsCount: 0,
         dailyViewsLimit: DAILY_FREE_VIEWS_LIMIT,
         canViewMore: true,
-      });
+      };
+      setSubscriptionStatus(guestStatus);
       setLoading(false);
       setInitialized(true);
       return;
+    }
+
+    // Check cache first (unless force refresh)
+    if (!forceRefresh && subscriptionCache.userId === user.id) {
+      const cacheAge = Date.now() - subscriptionCache.timestamp;
+      if (cacheAge < CACHE_DURATION) {
+        console.log('📦 Using cached subscription data');
+        setSubscriptionStatus(subscriptionCache.data!);
+        setLoading(false);
+        setInitialized(true);
+        return;
+      }
     }
 
     const supabase = createClient();
     setLoading(true);
 
     try {
-      // Fetch subscription
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      // Parallel fetch for better performance
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [subscriptionResult, viewsResult] = await Promise.all([
+        supabase
+          .from('subscriptions')
+          .select('id, active, end_date, plan, amount')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('profile_views_tracking')
+          .select('provider_id', { count: 'exact', head: false })
+          .eq('client_id', user.id)
+          .eq('view_date', today)
+      ]);
+
+      const subscription = subscriptionResult.data;
+      const viewsData = viewsResult.data;
 
       // Check if subscription is active and not expired
       const hasActiveSubscription = subscription
         ? subscription.active && new Date(subscription.end_date) > new Date()
         : false;
 
-      // Fetch daily views count - count DISTINCT providers viewed today
-      const today = new Date().toISOString().split('T')[0];
-      const { data: viewsData, error: viewsError } = await supabase
-        .from('profile_views_tracking')
-        .select('provider_id')
-        .eq('client_id', user.id)
-        .eq('view_date', today);
-
-      if (viewsError) {
-        console.error('Error fetching views:', viewsError);
-      }
-
       // Count unique providers viewed today
       const uniqueProviders = new Set(viewsData?.map(v => v.provider_id) || []);
       const viewsCount = uniqueProviders.size;
       const canViewMore = hasActiveSubscription || viewsCount < DAILY_FREE_VIEWS_LIMIT;
 
-      console.log('📊 Subscription Status Update:', {
-        hasActiveSubscription,
-        viewsCount,
-        limit: DAILY_FREE_VIEWS_LIMIT,
-        canViewMore,
-        uniqueProviders: Array.from(uniqueProviders)
-      });
-
-      setSubscriptionStatus({
+      const newStatus: SubscriptionStatus = {
         hasActiveSubscription,
         subscription: subscription || undefined,
         dailyViewsCount: viewsCount,
         dailyViewsLimit: DAILY_FREE_VIEWS_LIMIT,
         canViewMore,
+      };
+
+      // Update cache
+      subscriptionCache = {
+        data: newStatus,
+        timestamp: Date.now(),
+        userId: user.id,
+      };
+
+      console.log('📊 Subscription Status Updated:', {
+        hasActiveSubscription,
+        viewsCount,
+        limit: DAILY_FREE_VIEWS_LIMIT,
+        canViewMore,
+        cached: true
       });
+
+      setSubscriptionStatus(newStatus);
     } catch (error) {
       console.error('Error fetching subscription status:', error);
       // Even on error, set initialized to true to prevent infinite loading
-      setSubscriptionStatus({
+      const errorStatus = {
         hasActiveSubscription: false,
         dailyViewsCount: 0,
         dailyViewsLimit: DAILY_FREE_VIEWS_LIMIT,
         canViewMore: true,
-      });
+      };
+      setSubscriptionStatus(errorStatus);
     } finally {
       setLoading(false);
       setInitialized(true);
     }
-  };
+  }, [user]);
 
   // Fetch subscription status when user changes
   useEffect(() => {
     // Wait for user loading to complete before fetching subscription
     if (!userLoading) {
-      fetchSubscriptionStatus();
+      fetchSubscriptionStatus(false);
     }
-  }, [user, userLoading]);
+  }, [user, userLoading, fetchSubscriptionStatus]);
 
-  const trackProfileView = async (providerId: string) => {
+  const trackProfileView = useCallback(async (providerId: string) => {
     if (!user) return false;
 
     const supabase = createClient();
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      // Check if already viewed today
-      const { data: existingView, error: checkError } = await supabase
+      // Use upsert to avoid race conditions
+      const { error: upsertError, data } = await supabase
         .from('profile_views_tracking')
-        .select('*')
-        .eq('client_id', user.id)
-        .eq('provider_id', providerId)
-        .eq('view_date', today)
-        .maybeSingle();
+        .upsert(
+          {
+            client_id: user.id,
+            provider_id: providerId,
+            view_date: today,
+          },
+          {
+            onConflict: 'client_id,provider_id,view_date',
+            ignoreDuplicates: true
+          }
+        )
+        .select();
 
-      if (checkError) {
-        console.error('Error checking existing view:', checkError);
+      if (upsertError) {
+        console.error('Error tracking view:', upsertError);
+        return false;
       }
 
-      if (!existingView) {
-        // Insert new view tracking
-        const { error: insertError } = await supabase.from('profile_views_tracking').insert({
-          client_id: user.id,
-          provider_id: providerId,
-          view_date: today,
+      // Only update count if this was a new view
+      if (data && data.length > 0) {
+        console.log(`✅ Tracked new view for provider ${providerId}`);
+        
+        setSubscriptionStatus(prev => {
+          const newCount = prev.dailyViewsCount + 1;
+          const newStatus = {
+            ...prev,
+            dailyViewsCount: newCount,
+            canViewMore: prev.hasActiveSubscription || newCount < DAILY_FREE_VIEWS_LIMIT,
+          };
+          
+          // Update cache
+          if (subscriptionCache.userId === user.id) {
+            subscriptionCache.data = newStatus;
+          }
+          
+          return newStatus;
         });
-
-        if (insertError) {
-          console.error('Error inserting view tracking:', insertError);
-          return false;
-        }
-
-        console.log(`✅ Tracked new view for provider ${providerId} on ${today}`);
-
-        // Update the local state without refetching everything
-        setSubscriptionStatus(prev => ({
-          ...prev,
-          dailyViewsCount: prev.dailyViewsCount + 1,
-          canViewMore: prev.hasActiveSubscription || (prev.dailyViewsCount + 1) < DAILY_FREE_VIEWS_LIMIT,
-        }));
       } else {
         console.log(`ℹ️ Provider ${providerId} already viewed today`);
       }
@@ -163,9 +213,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       console.error('Error tracking profile view:', error);
       return false;
     }
-  };
+  }, [user]);
 
-  const checkContactUnlock = async (providerId: string): Promise<boolean> => {
+  const checkContactUnlock = useCallback(async (providerId: string): Promise<boolean> => {
     if (!user) return false;
 
     const supabase = createClient();
@@ -173,18 +223,18 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await supabase
         .from('contact_unlocks')
-        .select('*')
+        .select('id')
         .eq('client_id', user.id)
         .eq('provider_id', providerId)
-        .single();
+        .maybeSingle();
 
       return !!data;
     } catch (error) {
       return false;
     }
-  };
+  }, [user]);
 
-  const unlockContact = async (providerId: string): Promise<boolean> => {
+  const unlockContact = useCallback(async (providerId: string): Promise<boolean> => {
     if (!user) return false;
 
     try {
@@ -209,9 +259,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       console.error('Error verifying contact unlock:', error);
       return false;
     }
-  };
+  }, [user, checkContactUnlock]);
 
-  const subscribe = async (paymentMethod: 'mobile_money' | 'card'): Promise<boolean> => {
+  const subscribe = useCallback(async (paymentMethod: 'mobile_money' | 'card'): Promise<boolean> => {
     if (!user) return false;
 
     try {
@@ -220,16 +270,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       // We just need to refresh the subscription status
       console.log('Payment completed, refreshing subscription status...');
       
-      await fetchSubscriptionStatus();
+      // Force refresh to get latest data
+      await fetchSubscriptionStatus(true);
 
       return true;
     } catch (error) {
       console.error('Error refreshing subscription:', error);
       return false;
     }
-  };
+  }, [user, fetchSubscriptionStatus]);
 
-  const cancelSubscription = async (): Promise<boolean> => {
+  const cancelSubscription = useCallback(async (): Promise<boolean> => {
     if (!user) return false;
 
     const supabase = createClient();
@@ -245,13 +296,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
 
-      await fetchSubscriptionStatus();
+      // Force refresh to get latest data
+      await fetchSubscriptionStatus(true);
       return true;
     } catch (error) {
       console.error('Error canceling subscription:', error);
       return false;
     }
-  };
+  }, [user, fetchSubscriptionStatus]);
 
   return (
     <SubscriptionContext.Provider
