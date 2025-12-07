@@ -1,6 +1,6 @@
 import { createClient } from '../../lib/supabase/client';
 
-const PAYMENT_API_URL = 'http://localhost:3001/api/payments';
+const PAYMENT_API_URL = 'https://api.vibeslinx.com/api/payments';
 
 export interface InitiatePaymentRequest {
   userId: string;

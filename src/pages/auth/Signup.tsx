@@ -204,23 +204,6 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSignup} className="space-y-6">
-            {/* Referral Alerts */}
-            {referralCode && referralValid && (
-              <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-                <Gift className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <AlertDescription className="text-green-800 dark:text-green-200 text-sm">
-                  You're signing up with referral code <strong>{referralCode}</strong>. 
-                  Your referrer will earn rewards when you subscribe!
-                </AlertDescription>
-              </Alert>
-            )}
-            {referralCode && referralValid === false && (
-              <Alert variant="destructive">
-                <AlertDescription className="text-sm">
-                  Invalid referral code. You can still sign up without it.
-                </AlertDescription>
-              </Alert>
-            )}
 
             {/* Role Selection */}
             <div className="space-y-3">
