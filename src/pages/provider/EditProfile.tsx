@@ -156,38 +156,38 @@ export default function EditProviderProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-16 sm:pb-0">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-900">
               ConnectPro
             </h1>
           </Link>
           
           {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+          <nav className="hidden sm:flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/provider/dashboard">Dashboard</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="rounded-full border-gray-300" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      <div className="container mx-auto max-w-4xl px-6 py-12">
         {/* Page Header */}
-        <div className="mb-6">
-          <Button variant="ghost" size="sm" className="mb-4 -ml-2" asChild>
+        <div className="mb-8">
+          <Button variant="ghost" size="sm" className="mb-6 -ml-2 rounded-full hover:bg-gray-100" asChild>
             <Link to="/provider/profile">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Profile
@@ -195,11 +195,11 @@ export default function EditProviderProfilePage() {
           </Button>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                <Briefcase className="h-7 w-7 sm:h-8 sm:w-8" />
+              <h1 className="text-4xl font-semibold text-gray-900 flex items-center gap-3">
+                <Briefcase className="h-9 w-9" />
                 Edit Provider Profile
               </h1>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+              <p className="mt-3 text-lg text-gray-600">
                 Update your information to attract more clients and showcase your services
               </p>
             </div>
@@ -207,10 +207,10 @@ export default function EditProviderProfilePage() {
         </div>
 
         {/* Form Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">Professional Information</CardTitle>
-            <CardDescription>
+        <Card className="border border-gray-200 shadow-sm rounded-2xl">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-xl font-semibold">Professional Information</CardTitle>
+            <CardDescription className="text-base">
               Complete your profile with accurate information. High-quality profiles get more visibility and client inquiries.
             </CardDescription>
           </CardHeader>

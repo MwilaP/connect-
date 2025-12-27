@@ -178,30 +178,28 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Dashboard</h1>
-        <p className="text-gray-600 mt-2 text-lg">Overview of your platform statistics</p>
+      <div className="mb-10">
+        <h1 className="text-4xl font-semibold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-3 text-lg">Overview of your platform statistics</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent opacity-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+            <Card key={index} className="border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-2xl overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">
                   {stat.title}
                 </CardTitle>
-                <div className={`${stat.bgColor} p-3 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`${stat.bgColor} p-2.5 rounded-xl`}>
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-gray-900 mb-1">
+              <CardContent>
+                <div className="text-3xl font-semibold text-gray-900">
                   {stat.value}
                 </div>
-                <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full" />
               </CardContent>
             </Card>
           );

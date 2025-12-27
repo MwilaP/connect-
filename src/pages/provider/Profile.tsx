@@ -62,51 +62,51 @@ export default function ProviderProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-16 sm:pb-0">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-900">
               ConnectPro
             </h1>
           </Link>
           
           {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+          <nav className="hidden sm:flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/provider/dashboard">Dashboard</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="rounded-full border-gray-300" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <div className="container mx-auto max-w-6xl px-6 py-12">
         {/* Profile Header with Avatar */}
-        <Card className="mb-6 overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-background" />
-          <CardContent className="relative px-4 sm:px-6 pb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 sm:gap-6 -mt-16 sm:-mt-12">
-              <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background shadow-xl">
+        <Card className="mb-8 overflow-hidden border border-gray-200 shadow-sm rounded-2xl">
+          <div className="h-32 bg-gradient-to-b from-gray-50 to-white" />
+          <CardContent className="relative px-6 pb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6 -mt-16 sm:-mt-12">
+              <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
                 <AvatarImage src={profile?.images?.[0]} alt={profile?.name} />
-                <AvatarFallback className="text-2xl sm:text-4xl bg-primary/10">
+                <AvatarFallback className="text-4xl bg-gray-100">
                   {profile?.name?.charAt(0).toUpperCase() || <UserIcon className="h-12 w-12" />}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 pb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-3xl font-bold">{profile?.name}</h1>
-                  <Badge variant="secondary" className="hidden sm:inline-flex">
-                    <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                  <h1 className="text-3xl font-semibold text-gray-900">{profile?.name}</h1>
+                  <Badge variant="secondary" className="hidden sm:inline-flex bg-amber-100 text-amber-700 border-0">
+                    <Star className="h-3 w-3 mr-1 fill-amber-500 text-amber-500" />
                     Provider
                   </Badge>
                 </div>
@@ -131,7 +131,7 @@ export default function ProviderProfilePage() {
                   )}
                 </div>
               </div>
-              <Button size="lg" className="w-full sm:w-auto touch-target" asChild>
+              <Button size="lg" className="w-full sm:w-auto rounded-full" asChild>
                 <Link to="/provider/profile/edit">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Profile
@@ -145,23 +145,23 @@ export default function ProviderProfilePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* About Card */}
           {profile?.bio && (
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border border-gray-200 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
                   <UserIcon className="h-5 w-5" />
                   About Me
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
               </CardContent>
             </Card>
           )}
 
           {/* Quick Info Card */}
-          <Card>
+          <Card className="border border-gray-200 shadow-sm rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg">Quick Info</CardTitle>
+              <CardTitle className="text-lg font-semibold">Quick Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {profile && getProviderAge(profile) && (
@@ -189,9 +189,9 @@ export default function ProviderProfilePage() {
 
           {/* Services Card */}
           {profile?.services && profile.services.length > 0 && (
-            <Card className="lg:col-span-3">
+            <Card className="lg:col-span-3 border border-gray-200 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
                   <Briefcase className="h-5 w-5" />
                   Services Offered
                 </CardTitle>
@@ -199,7 +199,7 @@ export default function ProviderProfilePage() {
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {profile.services.map((service) => (
-                    <Card key={service.id} className="border-2 hover:border-primary/50 transition-colors">
+                    <Card key={service.id} className="border border-gray-200 shadow-sm rounded-xl hover:shadow-md hover:border-gray-300 transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold text-base">{service.service_name}</h3>
@@ -221,14 +221,14 @@ export default function ProviderProfilePage() {
 
           {/* Photos Gallery */}
           {profile?.images && profile.images.length > 0 && (
-            <Card className="lg:col-span-3">
+            <Card className="lg:col-span-3 border border-gray-200 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg">Photo Gallery</CardTitle>
+                <CardTitle className="text-lg font-semibold">Photo Gallery</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {profile.images.map((image: string, index: number) => (
-                    <div key={index} className="aspect-square overflow-hidden rounded-lg border-2 hover:border-primary/50 transition-colors">
+                    <div key={index} className="aspect-square overflow-hidden rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all">
                       <img
                         src={image || "/placeholder.svg"}
                         alt={`Profile photo ${index + 1}`}

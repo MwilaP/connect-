@@ -170,84 +170,90 @@ export default function ProviderDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-16 sm:pb-0">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-900">
               ConnectPro
             </h1>
           </Link>
           
           {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+          <nav className="hidden sm:flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/provider/profile">My Profile</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="rounded-full border-gray-300" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold">Provider Dashboard</h1>
-          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-muted-foreground">Track your profile performance</p>
+      <div className="container mx-auto px-6 py-12">
+        <div className="mb-10">
+          <h1 className="text-4xl font-semibold text-gray-900">Provider Dashboard</h1>
+          <p className="mt-3 text-lg text-gray-600">Track your profile performance and engagement</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Profile Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="border border-gray-200 shadow-sm rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Profile Views</CardTitle>
+              <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Eye className="h-5 w-5 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalViews}</div>
-              <p className="text-xs text-muted-foreground">All time views</p>
+              <div className="text-3xl font-semibold text-gray-900">{totalViews}</div>
+              <p className="text-sm text-gray-500 mt-1">All time views</p>
             </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer transition-all hover:shadow-lg hover:border-primary"
+            className="border border-gray-200 shadow-sm rounded-2xl cursor-pointer transition-all hover:shadow-md hover:border-gray-300"
             onClick={fetchSevenDayViews}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Views (Last 7 Days)</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Views (Last 7 Days)</CardTitle>
+              <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{viewsLast7Days}</div>
-              <p className="text-xs text-muted-foreground">Click to see details</p>
+              <div className="text-3xl font-semibold text-gray-900">{viewsLast7Days}</div>
+              <p className="text-sm text-gray-500 mt-1">Click to see details</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Views (Last 30 Days)</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="border border-gray-200 shadow-sm rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Views (Last 30 Days)</CardTitle>
+              <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-purple-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{viewsLast30Days}</div>
-              <p className="text-xs text-muted-foreground">Monthly performance</p>
+              <div className="text-3xl font-semibold text-gray-900">{viewsLast30Days}</div>
+              <p className="text-sm text-gray-500 mt-1">Monthly performance</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Recent Profile Views */}
-        <Card className="mt-6">
+        <Card className="mt-8 border border-gray-200 shadow-sm rounded-2xl">
           <CardHeader>
-            <CardTitle>Recent Profile Views</CardTitle>
-            <CardDescription>Latest visitors to your profile</CardDescription>
+            <CardTitle className="text-xl font-semibold">Recent Profile Views</CardTitle>
+            <CardDescription className="text-base">Latest visitors to your profile</CardDescription>
           </CardHeader>
           <CardContent>
             {recentViews.length > 0 ? (
@@ -285,10 +291,10 @@ export default function ProviderDashboardPage() {
         </Card>
 
         {/* Profile Summary */}
-        <Card className="mt-6">
+        <Card className="mt-8 border border-gray-200 shadow-sm rounded-2xl">
           <CardHeader>
-            <CardTitle>Your Profile</CardTitle>
-            <CardDescription>Quick overview of your provider profile</CardDescription>
+            <CardTitle className="text-xl font-semibold">Your Profile</CardTitle>
+            <CardDescription className="text-base">Quick overview of your provider profile</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
@@ -330,7 +336,7 @@ export default function ProviderDashboardPage() {
               </div>
             )}
             <div className="pt-4">
-              <Button asChild>
+              <Button asChild className="rounded-full">
                 <Link to="/provider/profile/edit">Edit Profile</Link>
               </Button>
             </div>

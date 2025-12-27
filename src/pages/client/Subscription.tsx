@@ -94,45 +94,45 @@ export default function SubscriptionPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-16 sm:pb-0">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-900">
               ConnectPro
             </h1>
           </Link>
           
           {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+          <nav className="hidden sm:flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/browse">Browse</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/client/profile">My Profile</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="rounded-full border-gray-300" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Subscription</h1>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground">Manage your premium membership</p>
+      <div className="container mx-auto max-w-4xl px-6 py-12">
+        <div className="mb-10">
+          <h1 className="text-4xl font-semibold text-gray-900">Subscription</h1>
+          <p className="mt-3 text-lg text-gray-600">Manage your premium membership</p>
         </div>
 
         {/* Current Subscription Status */}
-        <Card className="mb-6 sm:mb-8 overflow-hidden">
+        <Card className="mb-8 overflow-hidden border border-gray-200 shadow-sm rounded-2xl">
           {isActive && (
             <div className="h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400" />
           )}
@@ -209,17 +209,17 @@ export default function SubscriptionPage() {
         </Card>
 
         {/* Premium Benefits */}
-        <Card className="mb-6 sm:mb-8">
+        <Card className="mb-8 border border-gray-200 shadow-sm rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
+            <CardTitle className="text-xl flex items-center gap-2 font-semibold">
+              <Sparkles className="h-6 w-6 text-amber-500" />
               Premium Benefits
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Everything you get with a premium subscription</CardDescription>
+            <CardDescription className="text-base">Everything you get with a premium subscription</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:gap-6">
-              <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </div>
@@ -230,7 +230,7 @@ export default function SubscriptionPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </div>
@@ -241,7 +241,7 @@ export default function SubscriptionPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </div>
@@ -252,7 +252,7 @@ export default function SubscriptionPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10">
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </div>

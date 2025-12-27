@@ -10,6 +10,8 @@ import { SubscriptionBanner } from "../../components/SubscriptionBanner"
 import { PaymentModal } from "../../components/PaymentModal"
 import { PageLoader } from "../../components/PageLoader"
 import { BottomNav } from "../../components/BottomNav"
+import { Search, SlidersHorizontal } from "lucide-react"
+import { Input } from "../../../components/ui/input"
 import type { ProviderProfile } from "../../../lib/types"
 import type { User } from "@supabase/supabase-js"
 
@@ -30,6 +32,8 @@ export default function BrowseListPage() {
   const [hasClientProfile, setHasClientProfile] = useState(false)
   const [loading, setLoading] = useState(!cachedProviders)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showFilterModal, setShowFilterModal] = useState(false)
   const isInitialMount = useRef(true)
 
   // Restore scroll position when returning from detail page
@@ -130,86 +134,118 @@ export default function BrowseListPage() {
     navigate("/auth/login")
   }
 
+  const filteredProviders = providers.filter(provider => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      provider.name?.toLowerCase().includes(query) ||
+      provider.bio?.toLowerCase().includes(query) ||
+      provider.city?.toLowerCase().includes(query) ||
+      provider.area?.toLowerCase().includes(query)
+    )
+  })
+
   return (
-    <div className="min-h-screen pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              ConnectPro
-            </h1>
-          </Link>
-          
-          {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            {user ? (
-              <>
-                {userRole === "provider" && hasProviderProfile && (
-                  <>
-                    <Button variant="ghost" size="sm" className="touch-target" asChild>
-                      <Link to="/provider/dashboard">Dashboard</Link>
+    <div className="min-h-screen bg-white dark:bg-background pb-20 sm:pb-0">
+      {/* Airbnb-style Header */}
+      <header className="bg-white dark:bg-card border-b border-gray-200 dark:border-border sticky top-0 z-50 shadow-sm">
+        <div className="max-w-2xl mx-auto">
+          {/* Top Bar */}
+          <div className="flex h-20 items-center justify-between px-6">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-xl font-bold text-primary-foreground">C</span>
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">
+                ConnectPro
+              </h1>
+            </Link>
+            
+            {/* Desktop Navigation Only */}
+            <nav className="hidden sm:flex items-center gap-3">
+              {user ? (
+                <>
+                  {userRole === "provider" && hasProviderProfile && (
+                    <>
+                      <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-muted rounded-lg" asChild>
+                        <Link to="/provider/dashboard">Dashboard</Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-muted rounded-lg" asChild>
+                        <Link to="/provider/profile">Profile</Link>
+                      </Button>
+                    </>
+                  )}
+                  {userRole === "client" && hasClientProfile && (
+                    <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-muted rounded-lg" asChild>
+                      <Link to="/client/profile">Profile</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" className="touch-target" asChild>
-                      <Link to="/provider/profile">Profile</Link>
-                    </Button>
-                  </>
-                )}
-                {userRole === "client" && hasClientProfile && (
-                  <Button variant="ghost" size="sm" className="touch-target" asChild>
-                    <Link to="/client/profile">Profile</Link>
+                  )}
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-muted rounded-lg" onClick={handleSignOut}>
+                    Sign Out
                   </Button>
-                )}
-                <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" className="touch-target" asChild>
-                  <Link to="/auth/login">Login</Link>
-                </Button>
-                <Button size="sm" className="touch-target" asChild>
-                  <Link to="/auth/signup">Sign Up</Link>
-                </Button>
-              </>
-            )}
-          </nav>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-muted rounded-lg" asChild>
+                    <Link to="/auth/login">Login</Link>
+                  </Button>
+                  <Button size="sm" className="bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 rounded-lg" asChild>
+                    <Link to="/auth/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
+
+          {/* Search Bar */}
+          <div className="px-6 pb-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-12 h-12 rounded-full border border-gray-300 dark:border-border bg-white dark:bg-background hover:border-gray-400 dark:hover:border-border focus-visible:ring-2 focus-visible:ring-gray-900 dark:focus-visible:ring-primary focus-visible:border-gray-900 dark:focus-visible:border-primary transition-all shadow-sm"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-muted"
+                onClick={() => setShowFilterModal(true)}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Browse Providers</h1>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground">Find the perfect service provider for your needs</p>
-        </div>
-
+      <div className="max-w-2xl mx-auto">
         {/* Subscription Banner for non-subscribed clients */}
         {user && userRole === "client" && !subscriptionStatus.hasActiveSubscription && (
-          <SubscriptionBanner
-            viewsRemaining={subscriptionStatus.dailyViewsLimit - subscriptionStatus.dailyViewsCount}
-            viewsLimit={subscriptionStatus.dailyViewsLimit}
-            onUpgrade={() => setShowPaymentModal(true)}
-          />
+          <div className="px-6 pt-8">
+            <SubscriptionBanner
+              viewsRemaining={subscriptionStatus.dailyViewsLimit - subscriptionStatus.dailyViewsCount}
+              viewsLimit={subscriptionStatus.dailyViewsLimit}
+              onUpgrade={() => setShowPaymentModal(true)}
+            />
+          </div>
         )}
 
-        {/* Filters */}
-        <ProviderFilters />
-
         {/* Results */}
-        <div className="mt-6 sm:mt-8">
+        <div className="px-6 py-8">
           {loading ? (
             <PageLoader message="Loading providers..." variant="skeleton" />
-          ) : providers && providers.length > 0 ? (
+          ) : filteredProviders && filteredProviders.length > 0 ? (
             <>
-              <p className="mb-4 sm:mb-6 text-sm sm:text-base text-muted-foreground font-medium">
-                {providers.length} provider{providers.length !== 1 ? "s" : ""} found
-              </p>
-              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {providers.map((provider) => (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-foreground">
+                  {filteredProviders.length} {filteredProviders.length === 1 ? 'provider' : 'providers'} available
+                </h2>
+              </div>
+              <div className="space-y-6">
+                {filteredProviders.map((provider) => (
                   <ProviderCard 
                     key={provider.id} 
                     provider={provider}
@@ -219,22 +255,30 @@ export default function BrowseListPage() {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center px-4">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center mb-4">
-                <span className="text-3xl sm:text-4xl">🔍</span>
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="h-24 w-24 rounded-full bg-gray-100 dark:bg-muted/30 flex items-center justify-center mb-6">
+                <Search className="h-12 w-12 text-gray-400 dark:text-muted-foreground" />
               </div>
-              <p className="text-lg sm:text-xl font-semibold mb-2">No providers found</p>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-md">Try adjusting your filters or check back later for new providers</p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-foreground mb-3">No providers found</h3>
+              <p className="text-base text-gray-600 dark:text-muted-foreground max-w-md leading-relaxed">
+                {searchQuery ? 'Try a different search term or adjust your filters' : 'Try adjusting your filters or check back later for new providers'}
+              </p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Location Filter Modal */}
+      <ProviderFilters 
+        open={showFilterModal} 
+        onOpenChange={setShowFilterModal}
+      />
+
       {/* Payment Modal */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        amount={5}
+        amount={100}
         purpose="subscription"
         onSuccess={async (paymentMethod) => {
           const success = await subscribe(paymentMethod);

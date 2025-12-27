@@ -115,68 +115,68 @@ export default function NewProviderProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <span className="text-lg font-semibold">ConnectPro</span>
+            <span className="text-xl font-bold">ConnectPro</span>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-              <Briefcase className="h-8 w-8 text-primary" />
+      <div className="border-b bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-6 py-16">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-2">
+              <Briefcase className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">Create Your Provider Profile</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h1 className="text-5xl font-semibold tracking-tight">Create Your Provider Profile</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Join our marketplace and start connecting with clients who need your services
             </p>
             
             {/* Progress Steps */}
-            <div className="flex items-center justify-center gap-4 pt-6">
+            <div className="flex items-center justify-center gap-3 pt-8">
               <div className="flex items-center gap-2">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold transition-all ${
                   currentStep >= 1 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'border-2 border-border text-muted-foreground'
+                    ? 'bg-gray-900 text-white shadow-lg' 
+                    : 'border-2 border-gray-300 text-gray-400'
                 }`}>
                   {currentStep > 1 ? <CheckCircle2 className="h-5 w-5" /> : '1'}
                 </div>
-                <span className={`text-sm ${currentStep >= 1 ? 'font-medium' : 'text-muted-foreground'}`}>
+                <span className={`text-sm hidden sm:inline ${currentStep >= 1 ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
                   Profile Info
                 </span>
               </div>
-              <div className={`w-12 h-0.5 transition-colors ${currentStep > 1 ? 'bg-primary' : 'bg-border'}`}></div>
+              <div className={`w-16 h-0.5 transition-colors ${currentStep > 1 ? 'bg-gray-900' : 'bg-gray-300'}`}></div>
               <div className="flex items-center gap-2">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold transition-all ${
                   currentStep >= 2 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'border-2 border-border text-muted-foreground'
+                    ? 'bg-gray-900 text-white shadow-lg' 
+                    : 'border-2 border-gray-300 text-gray-400'
                 }`}>
                   {currentStep > 2 ? <CheckCircle2 className="h-5 w-5" /> : '2'}
                 </div>
-                <span className={`text-sm ${currentStep >= 2 ? 'font-medium' : 'text-muted-foreground'}`}>
+                <span className={`text-sm hidden sm:inline ${currentStep >= 2 ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
                   Services
                 </span>
               </div>
-              <div className={`w-12 h-0.5 transition-colors ${currentStep > 2 ? 'bg-primary' : 'bg-border'}`}></div>
+              <div className={`w-16 h-0.5 transition-colors ${currentStep > 2 ? 'bg-gray-900' : 'bg-gray-300'}`}></div>
               <div className="flex items-center gap-2">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold transition-all ${
                   currentStep >= 3 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'border-2 border-border text-muted-foreground'
+                    ? 'bg-gray-900 text-white shadow-lg' 
+                    : 'border-2 border-gray-300 text-gray-400'
                 }`}>
                   3
                 </div>
-                <span className={`text-sm ${currentStep >= 3 ? 'font-medium' : 'text-muted-foreground'}`}>
+                <span className={`text-sm hidden sm:inline ${currentStep >= 3 ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
                   Photos
                 </span>
               </div>
@@ -186,7 +186,7 @@ export default function NewProviderProfilePage() {
       </div>
 
       {/* Form Section */}
-      <div className="container mx-auto max-w-3xl px-4 py-8">
+      <div className="container mx-auto max-w-3xl px-6 py-12">
         <ProviderProfileForm userId={user.id} onStepChange={setCurrentStep} />
       </div>
     </div>

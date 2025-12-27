@@ -22,17 +22,17 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
   }
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg safe-bottom">
-      <div className="flex items-center justify-around h-16 px-1">
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-sm safe-bottom">
+      <div className="flex items-center justify-around h-16 px-2">
         {/* Browse - Clients Only */}
         {userRole === "client" && (
           <Link
             to="/browse"
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors touch-target flex-1",
+              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all touch-target flex-1",
               isActive("/browse")
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "text-gray-900 bg-gray-100"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             )}
           >
             <Search className="h-5 w-5" />
@@ -45,10 +45,10 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
           <Link
             to="/provider/dashboard"
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors touch-target flex-1",
+              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all touch-target flex-1",
               isActive("/provider/dashboard")
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "text-gray-900 bg-gray-100"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             )}
           >
             <LayoutDashboard className="h-5 w-5" />
@@ -61,10 +61,10 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
           <Link
             to="/provider/profile"
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors touch-target flex-1",
+              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all touch-target flex-1",
               isActive("/provider/profile")
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "text-gray-900 bg-gray-100"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             )}
           >
             <UserCircle className="h-5 w-5" />
@@ -74,10 +74,10 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
           <Link
             to="/client/profile"
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors touch-target flex-1",
+              "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all touch-target flex-1",
               isActive("/client/profile")
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "text-gray-900 bg-gray-100"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             )}
           >
             <UserCircle className="h-5 w-5" />
@@ -90,25 +90,25 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
           <SheetTrigger asChild>
             <button
               className={cn(
-                "flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors touch-target flex-1",
+                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all touch-target flex-1",
                 isActive("/referrals") || isActive("/client/subscription")
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "text-gray-900 bg-gray-100"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               )}
             >
               <MenuIcon className="h-5 w-5" />
               <span className="text-[10px] font-medium">More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-auto rounded-t-2xl">
+          <SheetContent side="bottom" className="h-auto rounded-t-3xl border-t border-gray-200 bg-white">
             <SheetHeader>
-              <SheetTitle className="text-left">More Options</SheetTitle>
+              <SheetTitle className="text-left text-xl font-semibold text-gray-900">More Options</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-2 mt-6 mb-4">
               {/* Referrals */}
               <Button
                 variant="ghost"
-                className="w-full justify-start touch-target h-14 text-base"
+                className="w-full justify-start touch-target h-14 text-base rounded-xl hover:bg-gray-100"
                 asChild
                 onClick={() => setMoreMenuOpen(false)}
               >
@@ -122,7 +122,7 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
               {userRole === "client" && hasClientProfile && (
                 <Button
                   variant="ghost"
-                  className="w-full justify-start touch-target h-14 text-base"
+                  className="w-full justify-start touch-target h-14 text-base rounded-xl hover:bg-gray-100"
                   asChild
                   onClick={() => setMoreMenuOpen(false)}
                 >
@@ -134,10 +134,10 @@ export function BottomNav({ userRole, hasProviderProfile, hasClientProfile, onSi
               )}
 
               {/* Sign Out */}
-              <div className="border-t pt-2 mt-2">
+              <div className="border-t border-gray-200 pt-3 mt-2">
                 <Button
                   variant="outline"
-                  className="w-full justify-start touch-target h-14 text-base text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="w-full justify-start touch-target h-14 text-base text-red-600 hover:text-red-700 hover:bg-red-50 border-gray-300 rounded-xl"
                   onClick={() => {
                     onSignOut()
                     setMoreMenuOpen(false)

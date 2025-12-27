@@ -52,28 +52,28 @@ export default function NewClientProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <span className="text-lg font-semibold">ConnectPro</span>
+            <span className="text-xl font-bold">ConnectPro</span>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-background">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-              <Users className="h-8 w-8 text-primary" />
+      <div className="border-b bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-6 py-16">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-2">
+              <Users className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">Create Your Client Profile</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h1 className="text-5xl font-semibold tracking-tight">Create Your Client Profile</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Set up your profile to start browsing and connecting with service providers
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function NewClientProfilePage() {
       </div>
 
       {/* Form Section */}
-      <div className="container mx-auto max-w-3xl px-4 py-8">
+      <div className="container mx-auto max-w-3xl px-6 py-12">
         <ClientProfileForm />
       </div>
     </div>

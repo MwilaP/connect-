@@ -58,51 +58,51 @@ export default function ClientProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Simplified Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-16 sm:pb-0">
+      {/* Header */}
+      <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-900">
               ConnectPro
             </h1>
           </Link>
           
           {/* Desktop Navigation Only */}
-          <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+          <nav className="hidden sm:flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/browse">Browse</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/client/subscription">Subscription</Link>
             </Button>
-            <Button variant="ghost" size="sm" className="touch-target" asChild>
+            <Button variant="ghost" size="sm" className="rounded-full hover:bg-gray-100" asChild>
               <Link to="/referrals">Referrals</Link>
             </Button>
-            <Button variant="outline" size="sm" className="touch-target" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="rounded-full border-gray-300" onClick={handleSignOut}>
               Sign Out
             </Button>
           </nav>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <div className="container mx-auto max-w-5xl px-6 py-12">
         {/* Profile Header with Avatar */}
-        <Card className="mb-6 overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-background" />
-          <CardContent className="relative px-4 sm:px-6 pb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 sm:gap-6 -mt-16 sm:-mt-12">
-              <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background shadow-xl">
+        <Card className="mb-8 overflow-hidden border border-gray-200 shadow-sm rounded-2xl">
+          <div className="h-32 bg-gradient-to-b from-gray-50 to-white" />
+          <CardContent className="relative px-6 pb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6 -mt-16 sm:-mt-12">
+              <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
                 {profile?.photo_url && <AvatarImage src={profile.photo_url} alt={profile?.name || "User"} />}
-                <AvatarFallback className="text-2xl sm:text-4xl bg-primary/10">
+                <AvatarFallback className="text-4xl bg-gray-100">
                   {profile?.name?.charAt(0).toUpperCase() || <UserIcon className="h-12 w-12" />}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 pb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold">{profile?.name}</h1>
+                <h1 className="text-3xl font-semibold text-gray-900">{profile?.name}</h1>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 text-sm text-muted-foreground">
                   {profile?.country && profile?.city && (
                     <div className="flex items-center gap-1.5">
@@ -118,7 +118,7 @@ export default function ClientProfilePage() {
                   )}
                 </div>
               </div>
-              <Button size="lg" className="w-full sm:w-auto touch-target" asChild>
+              <Button size="lg" className="w-full sm:w-auto rounded-full" asChild>
                 <Link to="/client/profile/edit">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Profile
@@ -132,20 +132,20 @@ export default function ClientProfilePage() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* About Card */}
           {profile?.bio && (
-            <Card className="md:col-span-2">
+            <Card className="md:col-span-2 border border-gray-200 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg">About Me</CardTitle>
+                <CardTitle className="text-lg font-semibold">About Me</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
               </CardContent>
             </Card>
           )}
 
           {/* Personal Information */}
-          <Card>
+          <Card className="border border-gray-200 shadow-sm rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg">Personal Information</CardTitle>
+              <CardTitle className="text-lg font-semibold">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start justify-between py-2 border-b">
@@ -177,12 +177,12 @@ export default function ClientProfilePage() {
 
           {/* Preferences Card */}
           {profile?.preferences && (
-            <Card>
+            <Card className="border border-gray-200 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg">Preferences</CardTitle>
+                <CardTitle className="text-lg font-semibold">Preferences</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">{profile.preferences}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{profile.preferences}</p>
               </CardContent>
             </Card>
           )}

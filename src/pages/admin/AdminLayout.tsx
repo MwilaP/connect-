@@ -55,20 +55,20 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg px-4 py-4 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
-            <LayoutDashboard className="h-5 w-5 text-blue-600" />
+          <div className="h-10 w-10 bg-gray-900 rounded-xl flex items-center justify-center">
+            <LayoutDashboard className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Admin Panel</h1>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-white hover:bg-blue-500"
+          className="text-gray-900 hover:bg-gray-100 rounded-full"
         >
           {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
@@ -78,26 +78,26 @@ export default function AdminLayout() {
         {/* Sidebar */}
         <aside
           className={`
-            fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl
+            fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 shadow-sm
             transform transition-transform duration-300 ease-in-out
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
           <div className="h-screen flex flex-col overflow-hidden">
             {/* Logo */}
-            <div className="hidden lg:flex items-center gap-3 px-6 h-20 border-b border-slate-700/50">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="hidden lg:flex items-center gap-3 px-6 h-20 border-b border-gray-200">
+              <div className="h-10 w-10 bg-gray-900 rounded-xl flex items-center justify-center">
                 <LayoutDashboard className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-                <p className="text-xs text-slate-400">Management Dashboard</p>
+                <h1 className="text-xl font-semibold text-gray-900">Admin Panel</h1>
+                <p className="text-xs text-gray-500">Management Dashboard</p>
               </div>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto py-6 px-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
-              <div className="space-y-2">
+            <nav className="flex-1 overflow-y-auto py-6 px-4">
+              <div className="space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.path;
@@ -108,22 +108,16 @@ export default function AdminLayout() {
                       to={item.path}
                       onClick={() => setSidebarOpen(false)}
                       className={`
-                        group flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium
-                        transition-all duration-200 relative overflow-hidden
+                        group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                        transition-all duration-150
                         ${isActive
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50'
-                          : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+                          ? 'bg-gray-100 text-gray-900'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }
                       `}
                     >
-                      {isActive && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent" />
-                      )}
-                      <Icon className={`h-5 w-5 relative z-10 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}`} />
-                      <span className="relative z-10">{item.label}</span>
-                      {isActive && (
-                        <div className="ml-auto h-2 w-2 rounded-full bg-white relative z-10" />
-                      )}
+                      <Icon className={`h-5 w-5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
+                      <span>{item.label}</span>
                     </Link>
                   );
                 })}
@@ -131,26 +125,26 @@ export default function AdminLayout() {
             </nav>
 
             {/* User Info & Logout */}
-            <div className="border-t border-slate-700/50 p-4 bg-slate-900/50">
-              <div className="bg-slate-800/50 rounded-xl p-4 mb-3 border border-slate-700/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg ring-2 ring-blue-400/20">
-                    <span className="text-white font-bold text-lg">
+            <div className="border-t border-gray-200 p-4">
+              <div className="bg-gray-50 rounded-2xl p-4 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gray-900 flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">
                       {user?.email?.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">
+                    <p className="text-sm font-medium text-gray-900 truncate">
                       {user?.email}
                     </p>
-                    <p className="text-xs text-blue-400 font-medium">Administrator</p>
+                    <p className="text-xs text-gray-500">Administrator</p>
                   </div>
                 </div>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200"
+                className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 rounded-xl"
                 onClick={handleSignOut}
               >
                 <LogOut className="h-4 w-4 mr-2" />

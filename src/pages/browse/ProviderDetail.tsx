@@ -8,7 +8,7 @@ import { Button } from "../../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { PaymentModal } from "../../components/PaymentModal"
 import { AccessRestrictionModal } from "../../components/AccessRestrictionModal"
-import { MapPin, User, Lock, Phone, Crown, X, ChevronLeft, ChevronRight, ArrowLeft, Calendar, Briefcase, DollarSign, Star, Image as ImageIcon } from "lucide-react"
+import { MapPin, User, Lock, Phone, Crown, X, ChevronLeft, ChevronRight, ArrowLeft, Calendar, Briefcase, DollarSign, Star, Image as ImageIcon, Heart, Share2, MessageCircle, CheckCircle, Sparkles } from "lucide-react"
 import { Badge } from "../../../components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
 import type { ProviderProfile } from "../../../lib/types"
@@ -63,10 +63,12 @@ export default function ProviderDetailPage() {
         alreadyViewedToday = !!existingView;
       }
 
-      // Check if user can view more profiles (only if they haven't viewed this one today)
-      if (user && !subscriptionStatus.hasActiveSubscription && !alreadyViewedToday) {
-        // Check if they've reached the limit
-        if (!subscriptionStatus.canViewMore) {
+      // Check if user can view more profiles
+      // Non-subscribed users can only view 3 unique providers per day
+      // They can re-view providers they've already seen today
+      if (user && !subscriptionStatus.hasActiveSubscription) {
+        // If they haven't viewed this provider today and have reached the limit, block access
+        if (!alreadyViewedToday && !subscriptionStatus.canViewMore) {
           setShowAccessRestriction(true)
           setLoading(false)
           return
@@ -217,78 +219,114 @@ export default function ProviderDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 sm:pb-0">
-      {/* Professional Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto flex h-14 sm:h-20 items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-primary-foreground">C</span>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              ConnectPro
-            </h1>
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="hidden sm:inline-flex touch-target" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Browse
-          </Button>
+    <div className="min-h-screen bg-white dark:bg-background pb-16 sm:pb-0">
+      {/* Airbnb-style Header */}
+      <header className="border-b border-gray-200 dark:border-border bg-white dark:bg-card sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6 lg:px-12">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-gray-100 dark:hover:bg-muted rounded-full" 
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-xl font-bold text-primary-foreground">C</span>
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground hidden sm:block">
+                ConnectPro
+              </h1>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-gray-100 dark:hover:bg-muted rounded-full hidden sm:flex" 
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-md px-0 sm:px-4 py-0 sm:py-6">
-        {/* Tinder-Style Card */}
-        <div className="relative h-[calc(100vh-7rem)] sm:h-[600px] sm:rounded-2xl overflow-hidden shadow-2xl">
+      <div className="container mx-auto max-w-7xl px-0 sm:px-6 lg:px-12 py-0 sm:py-8 lg:py-12">
+        <div className="grid lg:grid-cols-3 gap-0 lg:gap-12">
+          {/* Main Content - Left Side */}
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+        {/* Hero Image Card */}
+        <div className="relative h-[500px] sm:h-[550px] rounded-none sm:rounded-2xl overflow-hidden bg-gray-100 dark:bg-muted">
           {/* Image Carousel */}
-          <div className="relative h-full w-full">
+          <div className="relative h-full w-full group">
             {provider.images && provider.images.length > 0 ? (
               <>
-                <img
-                  src={provider.images[currentImageIndex] || "/placeholder.svg"}
-                  alt={provider.name}
-                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
-                    user && !subscriptionStatus.hasActiveSubscription ? 'blur-md' : ''
-                  }`}
-                />
-                {user && !subscriptionStatus.hasActiveSubscription && (
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-10">
-                    <Lock className="h-16 w-16 mb-4" />
-                    <p className="text-lg font-semibold mb-2">Subscribe to Unlock</p>
-                    <Button 
-                      onClick={() => setShowSubscriptionModal(true)}
-                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-                    >
-                      <Crown className="h-4 w-4 mr-2" />
-                      Get Premium
-                    </Button>
+                <div 
+                  className="absolute inset-0 cursor-pointer"
+                  onClick={() => {
+                    if (user && !subscriptionStatus.hasActiveSubscription && currentImageIndex > 0) {
+                      setShowSubscriptionModal(true)
+                    } else {
+                      setSelectedImageIndex(currentImageIndex)
+                    }
+                  }}
+                >
+                  <img
+                    src={provider.images[currentImageIndex] || "/placeholder.svg"}
+                    alt={provider.name}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                      user && !subscriptionStatus.hasActiveSubscription && currentImageIndex > 0 ? 'blur-lg scale-105' : ''
+                    }`}
+                  />
+                </div>
+                {user && !subscriptionStatus.hasActiveSubscription && currentImageIndex > 0 && (
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 flex flex-col items-center justify-center text-white z-10 pointer-events-none"
+                  >
+                    <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl max-w-sm mx-4 text-center">
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <Crown className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">Premium Content</h3>
+                      <p className="text-white/80 mb-6 text-sm">Subscribe to view all photos in full quality</p>
+                      <Button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowSubscriptionModal(true)
+                        }}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg pointer-events-auto"
+                      >
+                        <Crown className="h-5 w-5 mr-2" />
+                        Unlock Premium - K100/mo
+                      </Button>
+                    </div>
                   </div>
                 )}
               </>
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background flex items-center justify-center">
-                <Avatar className="h-48 w-48">
-                  <AvatarFallback className="text-6xl bg-primary/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center">
+                <Avatar className="h-56 w-56 shadow-2xl ring-4 ring-background">
+                  <AvatarFallback className="text-7xl bg-gradient-to-br from-primary/20 to-primary/10">
                     {provider.name?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>
             )}
 
-            {/* Image Navigation Dots */}
+            {/* Image Navigation Dots - Modern Style */}
             {provider.images && provider.images.length > 1 && (
-              <div className="absolute top-4 left-0 right-0 flex gap-1 px-4 z-20">
+              <div className="absolute top-6 left-0 right-0 flex gap-2 px-6 z-20 justify-center">
                 {provider.images.map((_, index) => (
-                  <div
+                  <button
                     key={index}
-                    className={`h-1 flex-1 rounded-full transition-all ${
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
                       index === currentImageIndex
-                        ? 'bg-white'
-                        : 'bg-white/40'
+                        ? 'bg-white w-8 shadow-lg'
+                        : 'bg-white/50 w-2 hover:bg-white/70'
                     }`}
                   />
                 ))}
@@ -299,304 +337,259 @@ export default function ProviderDetailPage() {
             {provider.images && provider.images.length > 1 && (
               <>
                 <div
-                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-                  onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : provider.images!.length - 1)}
+                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-20"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : provider.images!.length - 1)
+                  }}
                 />
                 <div
-                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-                  onClick={() => setCurrentImageIndex(prev => prev < provider.images!.length - 1 ? prev + 1 : 0)}
+                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-20"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setCurrentImageIndex(prev => prev < provider.images!.length - 1 ? prev + 1 : 0)
+                  }}
+                />
+                {/* Center tap area for full-screen view */}
+                <div
+                  className="absolute left-1/3 right-1/3 top-0 bottom-0 cursor-zoom-in z-20"
+                  onClick={() => {
+                    if (user && !subscriptionStatus.hasActiveSubscription && currentImageIndex > 0) {
+                      setShowSubscriptionModal(true)
+                    } else {
+                      setSelectedImageIndex(currentImageIndex)
+                    }
+                  }}
                 />
               </>
             )}
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+            {/* Gradient Overlay - Softer */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
 
-            {/* Profile Info Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-20">
-              <div className="flex items-end justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-3xl font-bold">{provider.name}</h1>
-                    {getProviderAge(provider) && (
-                      <span className="text-2xl font-semibold">{getProviderAge(provider)}</span>
-                    )}
-                  </div>
-                  {provider.country && provider.city && (
-                    <div className="flex items-center gap-2 text-white/90 mb-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>{formatLocation(provider.country, provider.city, provider.area || undefined)}</span>
-                    </div>
-                  )}
-                  {provider.bio && (
-                    <p className="text-sm text-white/80 line-clamp-2">{provider.bio}</p>
-                  )}
-                </div>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/40"
-                  onClick={() => setShowInfo(!showInfo)}
-                >
-                  <User className="h-5 w-5 text-white" />
-                </Button>
+            {/* Quick Info Badge */}
+            <div className="absolute top-6 left-6 z-20">
+              <div className="bg-white dark:bg-gray-900 rounded-full px-4 py-2 shadow-md flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">Available</span>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center justify-center gap-4">
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-14 w-14 rounded-full bg-white hover:bg-white/90 shadow-lg"
-                  onClick={() => navigate(-1)}
-                >
-                  <X className="h-6 w-6 text-red-500" />
-                </Button>
-                {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
-                  <Button
-                    size="icon"
-                    className="h-16 w-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 shadow-lg"
+            {/* Profile Name Overlay */}
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 text-white z-20">
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold drop-shadow-lg">{provider.name}</h1>
+                {getProviderAge(provider) && (
+                  <span className="text-xl sm:text-3xl font-semibold drop-shadow-lg">{getProviderAge(provider)}</span>
+                )}
+              </div>
+              {provider.country && provider.city && (
+                <div className="flex items-center gap-1.5 sm:gap-2 text-white/95 drop-shadow-md">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-lg font-medium">{formatLocation(provider.country, provider.city, provider.area || undefined)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Action Buttons - Below Image */}
+        <div className="flex items-center gap-3 px-6 sm:px-0 mt-6">
+          {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
+            <Button
+              size="lg"
+              className="flex-1 h-12 rounded-lg bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 text-base font-semibold shadow-sm"
+              onClick={() => {
+                if (provider.contact_number) {
+                  window.location.href = `tel:${provider.contact_number}`
+                }
+              }}
+            >
+              <Phone className="h-5 w-5 mr-2" />
+              <span className="hidden xs:inline">Call Now</span>
+              <span className="xs:hidden">Call</span>
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="flex-1 h-12 rounded-lg bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 text-base font-semibold shadow-sm"
+              onClick={() => setShowContactUnlockModal(true)}
+            >
+              <Lock className="h-5 w-5 mr-2" />
+              <span className="hidden xs:inline">Unlock Contact - K30</span>
+              <span className="xs:hidden">Unlock - K30</span>
+            </Button>
+          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-12 w-12 rounded-full hover:bg-gray-100 dark:hover:bg-muted border border-gray-300 dark:border-border"
+          >
+            <Heart className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* About Section */}
+        {provider.bio && (
+          <div className="mx-6 sm:mx-0 py-8 border-b border-gray-200 dark:border-border">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-foreground mb-4">About {provider.name}</h2>
+            <p className="text-gray-700 dark:text-muted-foreground leading-relaxed text-base">{provider.bio}</p>
+          </div>
+        )}
+
+        {/* Services */}
+        {provider.services && provider.services.length > 0 && (
+          <div className="mx-6 sm:mx-0 py-8 border-b border-gray-200 dark:border-border">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-foreground mb-6">Services Offered</h2>
+            <div className="grid gap-4">
+              {provider.services.map((service) => (
+                <div key={service.id} className="p-6 rounded-xl border border-gray-200 dark:border-border hover:shadow-md transition-shadow bg-white dark:bg-card">
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-lg text-gray-900 dark:text-foreground mb-2">{service.service_name}</h4>
+                      {service.description && (
+                        <p className="text-sm text-gray-600 dark:text-muted-foreground leading-relaxed">{service.description}</p>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0">
+                      <div className="text-right">
+                        <div className="text-2xl font-semibold text-gray-900 dark:text-foreground">K{service.price}</div>
+                        <div className="text-sm text-gray-500 dark:text-muted-foreground">per session</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sidebar - Right Side */}
+      <div className="lg:col-span-1 space-y-6 px-6 sm:px-0 pb-6 sm:pb-0">
+        {/* Contact Card */}
+        <div className="border border-gray-200 dark:border-border lg:sticky lg:top-24 rounded-xl p-6 shadow-sm bg-white dark:bg-card">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-foreground mb-6">Contact Information</h3>
+          <div className="space-y-4">
+            {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
+              <>
+                <div className="p-5 bg-gray-50 dark:bg-muted/30 rounded-xl border border-gray-200 dark:border-border">
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-muted-foreground mb-2 uppercase tracking-wide">Phone Number</p>
+                    <p className="font-semibold text-xl text-gray-900 dark:text-foreground">{provider.contact_number || '+260 XXX XXX XXX'}</p>
+                  </div>
+                  <Button 
+                    className="w-full bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 h-12 text-base font-semibold rounded-lg shadow-sm"
+                    size="lg"
                     onClick={() => {
                       if (provider.contact_number) {
                         window.location.href = `tel:${provider.contact_number}`
                       }
                     }}
                   >
-                    <Phone className="h-7 w-7 text-white" />
+                    <Phone className="h-5 w-5 mr-2" />
+                    Call Now
                   </Button>
-                ) : (
-                  <Button
-                    size="icon"
-                    className="h-16 w-16 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-                    onClick={() => setShowContactUnlockModal(true)}
-                  >
-                    <Lock className="h-6 w-6 text-white" />
-                  </Button>
-                )}
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-14 w-14 rounded-full bg-white hover:bg-white/90 shadow-lg"
-                  onClick={() => setShowInfo(!showInfo)}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="font-medium">Contact unlocked</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-5 bg-gray-50 dark:bg-muted/30 rounded-xl border border-gray-200 dark:border-border">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Lock className="h-5 w-5 text-gray-400 dark:text-muted-foreground" />
+                      <p className="font-semibold text-base text-gray-900 dark:text-foreground">Contact Locked</p>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">Unlock to get direct access to the phone number</p>
+                  </div>
+                  <div className="space-y-2 mb-5">
+                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-gray-900 dark:text-primary flex-shrink-0" />
+                      <span>Direct phone access</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-gray-900 dark:text-primary flex-shrink-0" />
+                      <span>Lifetime access</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-gray-900 dark:text-primary flex-shrink-0" />
+                      <span>Instant unlock</span>
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setShowContactUnlockModal(true)}
+                  className="w-full h-12 text-base font-semibold bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 rounded-lg shadow-sm"
+                  size="lg"
                 >
-                  <User className="h-6 w-6 text-primary" />
+                  <Lock className="h-5 w-5 mr-2" />
+                  Unlock for K30
                 </Button>
-              </div>
-            </div>
+                <p className="text-xs text-center text-gray-500 dark:text-muted-foreground mt-3">
+                  Secure payment • Instant access
+                </p>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Info Sheet - Slides up from bottom */}
-        {showInfo && (
-          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowInfo(false)}>
-            <div 
-              className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold">About {provider.name}</h2>
-                <Button size="icon" variant="ghost" onClick={() => setShowInfo(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
+        {/* Premium Subscription Card */}
+        {user && !subscriptionStatus.hasActiveSubscription && (
+          <div className="border border-gray-200 dark:border-border bg-white dark:bg-card rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                <Crown className="h-6 w-6 text-white" />
               </div>
-              <div className="p-6 space-y-6">
-
-            {/* Services */}
-            {provider.services && provider.services.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Services Offered
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 sm:gap-4">
-                    {provider.services.map((service) => (
-                      <Card key={service.id} className="border-2 hover:border-primary/50 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-base sm:text-lg">{service.service_name}</h4>
-                              {service.description && (
-                                <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
-                              )}
-                            </div>
-                            <Badge variant="secondary" className="text-base font-semibold px-3 py-1.5 flex items-center gap-1 flex-shrink-0">
-                              <DollarSign className="h-3 w-3" />
-                              K{service.price}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Full Bio */}
-            {provider.bio && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    About {provider.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">{provider.bio}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Photo Gallery */}
-            {provider.images && provider.images.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                    <ImageIcon className="h-5 w-5" />
-                    Photo Gallery ({provider.images.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                    {provider.images.map((image: string, index: number) => (
-                      <div 
-                        key={index} 
-                        className="aspect-square overflow-hidden rounded-lg border-2 hover:border-primary/50 relative group cursor-pointer transition-all"
-                        onClick={() => user && subscriptionStatus.hasActiveSubscription && setSelectedImageIndex(index)}
-                      >
-                        <img
-                          src={image || "/placeholder.svg"}
-                          alt={`${provider.name} photo ${index + 1}`}
-                          className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-110 ${
-                            user && !subscriptionStatus.hasActiveSubscription ? 'blur-md' : ''
-                          }`}
-                        />
-                        {user && !subscriptionStatus.hasActiveSubscription && (
-                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
-                            <Lock className="h-6 w-6 sm:h-8 sm:w-8 mb-1" />
-                            <p className="text-xs sm:text-sm font-medium">Subscribe</p>
-                          </div>
-                        )}
-                        {user && subscriptionStatus.hasActiveSubscription && (
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 text-xs px-2 py-1 rounded">
-                              Click to view
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-                {/* Contact Section in Sheet */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Phone className="h-5 w-5" />
-                    Contact Information
-                  </h3>
-                  {hasContactAccess || subscriptionStatus.hasActiveSubscription ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-                        <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                          <Phone className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-muted-foreground mb-0.5">Phone Number</p>
-                          <p className="font-semibold text-lg truncate">{provider.contact_number || '+260 XXX XXX XXX'}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
-                        <div className="h-5 w-5 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs">✓</span>
-                        </div>
-                        <span className="font-medium">Contact unlocked</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="p-4 bg-muted/50 rounded-lg border border-dashed">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                            <Lock className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">Contact Locked</p>
-                            <p className="text-xs text-muted-foreground">K30 one-time unlock</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Unlock to get direct contact access to this provider
-                        </p>
-                      </div>
-                      <Button 
-                        onClick={() => {
-                          setShowInfo(false)
-                          setShowContactUnlockModal(true)
-                        }}
-                        className="w-full"
-                        size="lg"
-                      >
-                        <Lock className="h-4 w-4 mr-2" />
-                        Unlock Contact - K30
-                      </Button>
-                      <p className="text-xs text-center text-muted-foreground">
-                        One-time payment • Valid forever
-                      </p>
-                    </div>
-                  )}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-foreground">Go Premium</h3>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">Unlock all features</p>
+              </div>
+            </div>
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-foreground">Unlimited Access</p>
+                  <p className="text-xs text-gray-600 dark:text-muted-foreground">View unlimited profiles daily</p>
                 </div>
-
-                {/* Subscription CTA in Sheet */}
-                {user && !subscriptionStatus.hasActiveSubscription && (
-                  <div className="p-6 border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 rounded-xl">
-                    <div className="flex items-start gap-3">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-                        <Crown className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-lg mb-1">Premium Access</h4>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Subscribe for K100/month to unlock all photos and get unlimited profile views
-                        </p>
-                        <ul className="space-y-2 mb-4 text-sm">
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                            <span>View all photos unblurred</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                            <span>Unlimited profile access</span>
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                            <span>Priority support</span>
-                          </li>
-                        </ul>
-                        <Button 
-                          onClick={() => {
-                            setShowInfo(false)
-                            setShowSubscriptionModal(true)
-                          }}
-                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md"
-                          size="lg"
-                        >
-                          <Crown className="h-4 w-4 mr-2" />
-                          Subscribe Now - K100/mo
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
+              <div className="flex items-start gap-3">
+                <ImageIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-foreground">Full Photo Access</p>
+                  <p className="text-xs text-gray-600 dark:text-muted-foreground">See all photos in HD quality</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Star className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-foreground">Priority Support</p>
+                  <p className="text-xs text-gray-600 dark:text-muted-foreground">Get help when you need it</p>
+                </div>
+              </div>
+            </div>
+            <div className="border-t border-gray-200 dark:border-border pt-4">
+              <div className="flex items-baseline justify-center mb-4">
+                <span className="text-3xl font-semibold text-gray-900 dark:text-foreground">K100</span>
+                <span className="text-base text-gray-600 dark:text-muted-foreground ml-1">/month</span>
+              </div>
+              <Button 
+                onClick={() => setShowSubscriptionModal(true)}
+                className="w-full h-12 bg-gray-900 dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 text-base font-semibold rounded-lg shadow-sm"
+                size="lg"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                Subscribe Now
+              </Button>
             </div>
           </div>
         )}
-
+      </div>
+    </div>
       </div>
 
       {/* Bottom Navigation for Mobile */}

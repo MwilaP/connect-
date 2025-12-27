@@ -36,6 +36,8 @@ export function PaymentModal({
   const [operator, setOperator] = useState<'mtn' | 'airtel' | 'zamtel'>('airtel');
   const [paymentReference, setPaymentReference] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'waiting' | 'failed' | 'success'>('idle');
+  const [failureReason, setFailureReason] = useState<string>('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
@@ -97,7 +99,8 @@ export function PaymentModal({
 
         setPaymentReference(response.data.reference);
 
-        // Show waiting message
+        // Show waiting status
+        setPaymentStatus('waiting');
         setError('Please check your phone and approve the payment prompt...');
 
         // Poll for payment status
@@ -109,18 +112,27 @@ export function PaymentModal({
 
         if (statusResponse.success && statusResponse.data?.status === 'completed') {
           // Payment successful
+          setPaymentStatus('success');
           const success = await onSuccess(paymentMethod);
           if (success) {
             setStep(3);
           } else {
+            setPaymentStatus('failed');
             setError('Payment completed but failed to update subscription. Please contact support.');
           }
         } else {
-          setError(
-            statusResponse.data?.status === 'failed'
-              ? 'Payment failed. Please try again.'
-              : 'Payment verification timed out. Please check your payment status.'
-          );
+          // Payment failed or timed out
+          setPaymentStatus('failed');
+          
+          // Extract detailed failure reason
+          const reason = extractFailureReason(statusResponse);
+          setFailureReason(reason);
+          
+          if (statusResponse.data?.status === 'failed') {
+            setError(`Payment failed: ${reason}`);
+          } else {
+            setError('Payment verification timed out. Please check your payment status.');
+          }
         }
       } else {
         // Card payment (simulated for now)
@@ -140,6 +152,29 @@ export function PaymentModal({
     }
   };
 
+  const extractFailureReason = (statusResponse: any): string => {
+    const message = statusResponse.data?.message || statusResponse.error?.message || '';
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.includes('insufficient') || lowerMessage.includes('balance')) {
+      return 'Insufficient balance in your mobile money account';
+    }
+    if (lowerMessage.includes('declined') || lowerMessage.includes('reject')) {
+      return 'Payment was declined by your mobile money provider';
+    }
+    if (lowerMessage.includes('timeout') || lowerMessage.includes('expired')) {
+      return 'Payment request timed out - you did not approve in time';
+    }
+    if (lowerMessage.includes('cancel')) {
+      return 'Payment was cancelled';
+    }
+    if (lowerMessage.includes('invalid')) {
+      return 'Invalid payment details provided';
+    }
+    
+    return message || 'Payment failed. Please try again.';
+  };
+
   const handleClose = () => {
     if (!isProcessing) {
       setStep(1);
@@ -147,11 +182,20 @@ export function PaymentModal({
       setOperator('airtel');
       setPaymentReference('');
       setError('');
+      setPaymentStatus('idle');
+      setFailureReason('');
       setCardNumber('');
       setExpiryDate('');
       setCvv('');
       onClose();
     }
+  };
+
+  const handleRetry = () => {
+    setError('');
+    setPaymentStatus('idle');
+    setFailureReason('');
+    setPaymentReference('');
   };
 
   // Auto-detect operator when phone number changes
@@ -271,8 +315,41 @@ export function PaymentModal({
                   </RadioGroup>
                 </div>
 
-                {error && (
-                  <Alert variant={error.includes('check your phone') ? 'default' : 'destructive'}>
+                {/* Payment Status Indicator */}
+                {paymentStatus === 'waiting' && (
+                  <Alert variant="default" className="border-blue-500 bg-blue-50 dark:bg-blue-950">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertDescription>
+                      <strong>Waiting for approval...</strong>
+                      <br />
+                      Please check your phone and approve the payment prompt.
+                      {paymentReference && (
+                        <span className="block text-xs mt-1 opacity-70">
+                          Reference: {paymentReference}
+                        </span>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {paymentStatus === 'failed' && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Payment Failed</strong>
+                      <br />
+                      {failureReason || error}
+                      {paymentReference && (
+                        <span className="block text-xs mt-1 opacity-70">
+                          Reference: {paymentReference}
+                        </span>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {error && paymentStatus === 'idle' && (
+                  <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
@@ -329,28 +406,48 @@ export function PaymentModal({
             )}
 
             <div className="flex gap-3 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="flex-1"
-                disabled={isProcessing}
-              >
-                Back
-              </Button>
-              <Button
-                onClick={handlePayment}
-                disabled={isProcessing || (paymentMethod === 'mobile_money' && !phoneNumber)}
-                className="flex-1"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {paymentReference ? 'Waiting for approval...' : 'Processing...'}
-                  </>
-                ) : (
-                  `Pay K${amount}`
-                )}
-              </Button>
+              {paymentStatus !== 'failed' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    className="flex-1"
+                    disabled={isProcessing}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handlePayment}
+                    disabled={isProcessing || (paymentMethod === 'mobile_money' && !phoneNumber)}
+                    className="flex-1"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {paymentStatus === 'waiting' ? 'Waiting for approval...' : 'Processing...'}
+                      </>
+                    ) : (
+                      `Pay K${amount}`
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={handleClose}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleRetry}
+                    className="flex-1"
+                  >
+                    Try Again
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
